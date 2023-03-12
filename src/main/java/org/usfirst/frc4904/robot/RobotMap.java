@@ -133,7 +133,7 @@ public class RobotMap {
     public static class PID {
         public static class Drive {
             // PID constants
-            public static final double kP = 0.1771; // TODO: @zbuster05 why times four??
+            public static final double kP = 0.1771*4; // TODO: @zbuster05 why times four??
             public static final double kI = 0;  // TODO: tune
             public static final double kD = 0;  // TODO: tune
             // feedforward constants
