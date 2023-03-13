@@ -4,6 +4,8 @@
 
 package org.usfirst.frc4904.robot.seenoevil;
 
+import static java.util.Map.entry;    
+
 import static edu.wpi.first.wpilibj.XboxController.Button;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -43,7 +45,32 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
  */
 
 public class RobotContainer2 {
-        private static Map<String, Trajectory> trajectories;
+        private static TrajectoryConfig trajectoryConfig = new TrajectoryConfig(
+                        AutoConstants.kMaxSpeedMetersPerSecond,
+                        AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+                        // Add kinematics to ensure max speed is actually obeyed
+                        .setKinematics(DriveConstants.kDriveKinematics)
+                        // Apply the voltage constraint
+                        .addConstraint(new DifferentialDriveVoltageConstraint(
+                        new SimpleMotorFeedforward(
+                                DriveConstants.ksVolts,
+                                DriveConstants.kvVoltSecondsPerMeter,
+                                DriveConstants.kaVoltSecondsSquaredPerMeter),
+                        DriveConstants.kDriveKinematics,
+                        10));
+        private static Map<String, Trajectory> trajectories = Map.ofEntries(
+                entry("yes", TrajectoryGenerator.generateTrajectory(
+                        // Start at the origin facing the +X direction
+                        new Pose2d(0, 0, new Rotation2d(0)),
+                        // Pass through these two interior waypoints, making an 's' curve path
+                        // List.of(new Translation2d(0.33*dist, .15*dist), new Translation2d(0.66*dist, -.15*dist)),
+                        List.of(new Translation2d(1, -1), new Translation2d(2, -1)),
+        
+                        // End 3 meters straight ahead of where we started, facing forward
+                        new Pose2d(2, 0, new Rotation2d(Math.PI/2)),
+                        trajectoryConfig)
+                )
+        );
 
         public static class Component {
                 public static WPI_TalonFX leftATalonFX;
@@ -164,39 +191,21 @@ public class RobotContainer2 {
 
 
 
-            // Create a voltage constraint to ensure we don't accelerate too fast
-            var autoVoltageConstraint = new DifferentialDriveVoltageConstraint(
-                            new SimpleMotorFeedforward(
-                                            DriveConstants.ksVolts,
-                                            DriveConstants.kvVoltSecondsPerMeter,
-                                            DriveConstants.kaVoltSecondsSquaredPerMeter),
-                            DriveConstants.kDriveKinematics,
-                            10);
+        // An example trajectory to follow. All units in meters.
+        Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
+                // Start at the origin facing the +X direction
+                new Pose2d(0, 0, new Rotation2d(0)),
+                // Pass through these two interior waypoints, making an 's' curve path
+                // List.of(new Translation2d(0.33*dist, .15*dist), new Translation2d(0.66*dist,
+                // -.15*dist)),
+                List.of(new Translation2d(2, -2), new Translation2d(4, -2)),
 
-            // Create config for trajectory
-            TrajectoryConfig config = new TrajectoryConfig(
-                            AutoConstants.kMaxSpeedMetersPerSecond,
-                            AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-                            // Add kinematics to ensure max speed is actually obeyed
-                            .setKinematics(DriveConstants.kDriveKinematics)
-                            // Apply the voltage constraint
-                            .addConstraint(autoVoltageConstraint);
-
-            final double dist = 1;
-
-            // An example trajectory to follow. All units in meters.
-            Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
-                            // Start at the origin facing the +X direction
-                            new Pose2d(0, 0, new Rotation2d(0)),
-                            // Pass through these two interior waypoints, making an 's' curve path
-                            // List.of(new Translation2d(0.33*dist, .15*dist), new Translation2d(0.66*dist,
-                            // -.15*dist)),
-                            List.of(new Translation2d(2, -2), new Translation2d(4, -2)),
-
-                            // End 3 meters straight ahead of where we started, facing forward
-                            new Pose2d(4, 0, new Rotation2d(Math.PI / 2)),
-                            // Pass config
-                            config);
-        return exampleTrajectory;
+                // End 3 meters straight ahead of where we started, facing forward
+                new Pose2d(4, 0, new Rotation2d(Math.PI / 2)),
+                // Pass config
+                trajectoryConfig);
+                            
+        // return exampleTrajectory;
+        return trajectories.get(trajectoryName);
     }
 }
