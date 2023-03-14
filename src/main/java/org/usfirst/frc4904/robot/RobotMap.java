@@ -204,6 +204,10 @@ public class RobotMap {
             () -> armRotationMotors.getSensorPositionRotations() * Math.PI / 180);
 
         ArmPivotSubsystem armPivotSubsystem = new ArmPivotSubsystem(armRotationMotors, armExtensionSubsystem::getCurrentExtensionLength);
+        // assume the arm is on the forward hard stop, fully retracted
+        // TODO: move the arm up to vertical before zeroing the extension motor?
+        armPivotSubsystem.initEncoderPositions();
+        armExtensionSubsystem.initEncoderPositions();
 
         Component.arm = new ArmSubsystem(armPivotSubsystem, armExtensionSubsystem);
 
