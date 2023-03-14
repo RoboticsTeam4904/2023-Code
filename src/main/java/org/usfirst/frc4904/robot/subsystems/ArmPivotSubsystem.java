@@ -62,6 +62,21 @@ public class ArmPivotSubsystem extends SubsystemBase {
         return angle / (360/GEARBOX_RATIO);
     }
 
+    public Command c_controlRotation(DoubleSupplier degreesFromHorizontalDealer) {
+        armMotorGroup.configPIDF(kP, kI, kD, 0, 2048, funnynumber("Pivot DMP peakOutput", 0.1), null);
+        armMotorGroup.configDMP(0, Units.radiansPerSecondToRotationsPerMinute(MAX_ANGULAR_VEL)*GEARBOX_RATIO, Units.radiansPerSecondToRotationsPerMinute(MAX_ANGULAR_ACCEL)*GEARBOX_RATIO, kS, null);
+        return armMotorGroup.c_controlPosition(
+            () -> Units.degreesToRotations(degreesFromHorizontalDealer.getAsDouble())*GEARBOX_RATIO,
+            () -> this.feedforward.calculate(
+                extensionDealer.getAsDouble()/MAX_EXTENSION,
+                Units.degreesToRadians(getCurrentAngleDegrees()),
+                Units.rotationsPerMinuteToRadiansPerSecond(armMotorGroup.getSensorVelocityRPM()),
+                0
+            )
+        );
+        // could also make native version of holdRotation using DMP, or ezMotion version of this 
+    }
+
     public Command c_holdRotation(double degreesFromHorizontal) {
         ezControl controller = new ezControl(
             kP, kI, kD,
