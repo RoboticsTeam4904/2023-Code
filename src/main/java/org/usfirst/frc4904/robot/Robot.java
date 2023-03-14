@@ -56,7 +56,8 @@ public class Robot extends CommandRobotBase {
 
         // shhhhhh
         final RobotContainer2 donttouchme = new RobotContainer2();
-        final Trajectory trajectory = donttouchme.getTrajectory("yes");
+        // sickle, straight_forward, straight_reverse
+        final Trajectory trajectory = donttouchme.getTrajectory("sickle");
         var command = donttouchme.getAutonomousCommand(trajectory);
         command.andThen(Commands.runOnce(() -> donttouchme.getAutonomousCommand(trajectory))).schedule();
     }
