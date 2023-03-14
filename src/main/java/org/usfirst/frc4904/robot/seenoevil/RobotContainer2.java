@@ -95,6 +95,12 @@ public class RobotContainer2 {
                         List.of(new Translation2d(1, 0)),
                         new Pose2d(2, 0, new Rotation2d(Math.PI)),
                         trajectoryConfigReversed
+                )),
+                entry("turn_right", TrajectoryGenerator.generateTrajectory(
+                        new Pose2d(0, 0, new Rotation2d(0)),
+                        List.of(new Translation2d(0.5, -0.5)),
+                        new Pose2d(1, 1, new Rotation2d(Math.PI/2)),
+                        trajectoryConfig
                 ))
         );
 
