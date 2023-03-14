@@ -13,8 +13,11 @@ import org.usfirst.frc4904.robot.humaninterface.drivers.NathanGain;
 import org.usfirst.frc4904.robot.humaninterface.operators.DefaultOperator;
 import org.usfirst.frc4904.standard.CommandRobotBase;
 
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+
 import edu.wpi.first.math.controller.DifferentialDriveWheelVoltages;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 // TODO implement test and sim in CommandRobotBase
@@ -76,6 +79,15 @@ public class Robot extends CommandRobotBase {
 
     @Override
     public void alwaysExecute() {
+        try {
+            SmartDashboard.putBoolean("extension Fwd limit pressed", RobotMap.Component.arm.armExtensionSubsystem.getMotor().leadMotor.isFwdLimitSwitchPressed());
+            SmartDashboard.putBoolean("extension Rev limit pressed", RobotMap.Component.arm.armExtensionSubsystem.getMotor().leadMotor.isRevLimitSwitchPressed());
+            SmartDashboard.putBoolean("pivot Fwd limit pressed", RobotMap.Component.arm.armPivotSubsystem.armMotorGroup.leadMotor.isFwdLimitSwitchPressed());
+            SmartDashboard.putBoolean("pivot Rev limit pressed", RobotMap.Component.arm.armPivotSubsystem.armMotorGroup.leadMotor.isRevLimitSwitchPressed());
+        } catch (IllegalAccessException e) {
+            //cry
+            // this should never happen because we don't use spark maxes AND we won't be declaring spark maxes and trying to low-level-read their limit switch status w/o constructing with the correct limit switch type
+        }
     }
 
 }
