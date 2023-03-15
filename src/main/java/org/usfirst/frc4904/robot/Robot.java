@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // TODO implement test and sim in CommandRobotBase
 public class Robot extends CommandRobotBase {
-    private static RobotMap map = new RobotMap();
+    private final RobotMap map = new RobotMap();
 
     @Override
     public void initialize() {
@@ -33,10 +33,16 @@ public class Robot extends CommandRobotBase {
 
     @Override
     public void teleopInitialize() {
+        RobotMap.Component.arm.armPivotSubsystem.c_feedforwardTest(() -> 12 * Math.PI * 2).schedule();
+        // RobotMap.Component.arm.armExtensionSubsystem.c_holdExtension(1);
+        // RobotMap.Component.arm.armExtensionSubsystem.getMotor().setVoltage(1);
     }
 
     @Override
     public void teleopExecute() {
+        // RobotMap.Component.arm.armExtensionSubsystem.getMotor().setVoltage(1);
+        SmartDashboard.putNumber("eeeeeee motor volts", RobotMap.Component.arm.armExtensionSubsystem.getMotor().leadMotor.getMotorOutputVoltage());
+        // SmartDashboard.putNumber("motor pos", RobotMap.Component.arm.armExtensionSubsystem.getMotor().getSensorPositionRotations());
     }
 
     @Override

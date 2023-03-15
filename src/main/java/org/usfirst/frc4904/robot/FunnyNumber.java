@@ -38,7 +38,7 @@ public class FunnyNumber {
         }
     }
     public static double funnynumber(String name, double defaultValue) {
-        return funnynumber(name, defaultValue);
+        return funnynumber(name, defaultValue, null);
     }
     public static double sdlog(String name, double value) {
         SmartDashboard.putNumber(name, value);

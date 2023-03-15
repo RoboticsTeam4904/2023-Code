@@ -64,15 +64,15 @@ public class RobotMap {
         
         // // 2023 robot constants
         // public static class CANMotor {
-        //     public static final int RIGHT_DRIVE_A = 3; // TODO: Check chassis motor IDs
+        //     public static final int RIGHT_DRIVE_Astatic = 3; // TODO: Check chassis motor IDs
         //     public static final int RIGHT_DRIVE_B = 4;
         //     public static final int LEFT_DRIVE_A = 1;
         //     public static final int LEFT_DRIVE_B = 2;
         // }
 
-            public static final int PIVOT_MOTOR_LEFT = -1;
-            public static final int PIVOT_MOTOR_RIGHT = -1;
-            public static final int ARM_EXTENSION_MOTOR = -1;
+            public static final int PIVOT_MOTOR_LEFT = 11;
+            public static final int PIVOT_MOTOR_RIGHT = 12;
+            public static final int ARM_EXTENSION_MOTOR = 14;
 
             public static final int LEFT_INTAKE = -1; //TODO: fix
             public static final int RIGHT_INTAKE = -1; //TODO: fix
@@ -212,10 +212,10 @@ public class RobotMap {
         Component.arm = new ArmSubsystem(armPivotSubsystem, armExtensionSubsystem);
 
         // Intake
-        CustomCANSparkMax intake_left = new CustomCANSparkMax(Port.CANMotor.LEFT_INTAKE, null, false);
-        CustomCANSparkMax intake_right = new CustomCANSparkMax(Port.CANMotor.RIGHT_INTAKE, null, true);
-        SparkMaxMotorSubsystem intake_motors = new SparkMaxMotorSubsystem("intake", IdleMode.kCoast, 0, intake_left, intake_right);
-        Component.intake = new Intake(intake_motors);
+        // CustomCANSparkMax intake_left = new CustomCANSparkMax(Port.CANMotor.LEFT_INTAKE, null, false);
+        // CustomCANSparkMax intake_right = new CustomCANSparkMax(Port.CANMotor.RIGHT_INTAKE, null, true);
+        // SparkMaxMotorSubsystem intake_motors = new SparkMaxMotorSubsystem("intake", IdleMode.kCoast, 0, intake_left, intake_right);
+        // Component.intake = new Intake(intake_motors);
 
         // links we'll need
         // - angles and distances for intake/outtake: https://docs.google.com/spreadsheets/d/1B7Ie4efOpuZb4UQsk8lHycGvi6BspnF74DUMLmiKGUM/edit?usp=sharing
