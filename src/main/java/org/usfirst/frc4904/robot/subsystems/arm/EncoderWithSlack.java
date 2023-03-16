@@ -2,10 +2,11 @@ package org.usfirst.frc4904.robot.subsystems.arm;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.usfirst.frc4904.standard.subsystems.RequirementsSubsystemBase;
 
-public class EncoderWithSlack extends SubsystemBase {   // just extends SubsystemBase so we can have a periodic
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+public class EncoderWithSlack extends RequirementsSubsystemBase {   // just extends SubsystemBase so we can have a periodic
     public final DoubleSupplier encoderRevsDealer;
     public final double slackWindow;
     public final double unitsPerRevolution;

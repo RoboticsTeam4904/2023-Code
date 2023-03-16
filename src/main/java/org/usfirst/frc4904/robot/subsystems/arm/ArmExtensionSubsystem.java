@@ -8,6 +8,7 @@ import java.util.function.DoubleSupplier;
 import org.opencv.core.Mat.Tuple2;
 import org.usfirst.frc4904.standard.custom.motioncontrollers.ezControl;
 import org.usfirst.frc4904.standard.custom.motioncontrollers.ezMotion;
+import org.usfirst.frc4904.standard.subsystems.RequirementsSubsystemBase;
 import org.usfirst.frc4904.standard.subsystems.motor.TalonMotorSubsystem;
 
 import edu.wpi.first.math.Pair;
@@ -16,9 +17,8 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class ArmExtensionSubsystem extends SubsystemBase {
+public class ArmExtensionSubsystem extends RequirementsSubsystemBase {
     
     private final TalonMotorSubsystem motor;
     private final static double SPOOL_DIAMETER = Units.inchesToMeters(0.75);
@@ -44,6 +44,7 @@ public class ArmExtensionSubsystem extends SubsystemBase {
      * @param motor the motor controller used to extend the arm
      */
     public ArmExtensionSubsystem(TalonMotorSubsystem motor, DoubleSupplier angleDegreesDealer) {
+        super(motor);
         this.motor = motor;
         this.feedforward = new ArmFeedforward(kS, kG, kV);
         this.angleDealer = angleDegreesDealer;

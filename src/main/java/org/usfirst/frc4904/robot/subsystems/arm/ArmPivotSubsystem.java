@@ -5,18 +5,17 @@ import java.util.function.DoubleSupplier;
 import org.opencv.core.Mat.Tuple2;
 import org.usfirst.frc4904.standard.custom.motioncontrollers.ezControl;
 import org.usfirst.frc4904.standard.custom.motioncontrollers.ezMotion;
+import org.usfirst.frc4904.standard.subsystems.RequirementsSubsystemBase;
 import org.usfirst.frc4904.standard.subsystems.motor.TalonMotorSubsystem;
 import org.usfirst.frc4904.standard.subsystems.motor.TelescopingArmPivotFeedForward;
 
 import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class ArmPivotSubsystem extends SubsystemBase {
+public class ArmPivotSubsystem extends RequirementsSubsystemBase {
     public static final double INITIAL_ARM_ANGLE = -38;
     public static final double GEARBOX_RATIO = 48; //48:1, 48 rotations of motor = 360 degrees
     public static final double GEARBOX_SLACK_DEGREES = 6;
@@ -41,6 +40,7 @@ public class ArmPivotSubsystem extends SubsystemBase {
     private final EncoderWithSlack slackyEncoder;
 
     public ArmPivotSubsystem(TalonMotorSubsystem armMotorGroup, DoubleSupplier extensionDealer) {
+        super(armMotorGroup);
         this.armMotorGroup = armMotorGroup;
         this.extensionDealer = extensionDealer;
         this.feedforward = new TelescopingArmPivotFeedForward(kG_retracted, kG_extended, kS, kV, kA);
