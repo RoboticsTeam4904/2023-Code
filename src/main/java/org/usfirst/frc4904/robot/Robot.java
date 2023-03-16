@@ -17,6 +17,8 @@ import org.usfirst.frc4904.robot.humaninterface.operators.DefaultOperator;
 import org.usfirst.frc4904.robot.seenoevil.RobotContainer2;
 import org.usfirst.frc4904.robot.seenoevil.RobotContainer2.Component;
 import org.usfirst.frc4904.standard.CommandRobotBase;
+import org.usfirst.frc4904.standard.humaninput.Driver;
+import org.usfirst.frc4904.standard.humaninput.Operator;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -36,19 +38,23 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Robot extends CommandRobotBase {
     private final RobotMap map = new RobotMap();
     private final RobotContainer2 donttouchme = new RobotContainer2(RobotMap.Component.frontLeftWheelTalon, RobotMap.Component.backLeftWheelTalon, RobotMap.Component.frontRightWheelTalon, RobotMap.Component.backRightWheelTalon, RobotMap.Component.navx);
+    private final Driver driver = new NathanGain();
+    private final Operator operator = new DefaultOperator();
 
 
     @Override
     public void initialize() {
-        driverChooser.setDefaultOption(new NathanGain());
-        operatorChooser.setDefaultOption(new DefaultOperator()); 
+        // driverChooser.setDefaultOption(new NathanGain());
+        // operatorChooser.setDefaultOption(new DefaultOperator()); 
     }
 
     @Override
     public void teleopInitialize() {
-        RobotMap.Component.arm.armPivotSubsystem.c_holdRotation(0, 60, 60);
+        // RobotMap.Component.arm.armPivotSubsystem.c_holdRotation(0, 60, 60);
         // RobotMap.Component.arm.armPivotSubsystem.c_controlAngularVelocity(() -> 0).schedule();
-        RobotMap.Component.chassis.setDefaultCommand(RobotMap.Component.chassis.c_controlChassisSpeedAndTurn(() -> new Pair<Double, Double>(Robot.drivingConfig.getX(), Robot.drivingConfig.getTurnSpeed())));
+
+        driver.bindCommands();
+        operator.bindCommands();
     }
 
     @Override

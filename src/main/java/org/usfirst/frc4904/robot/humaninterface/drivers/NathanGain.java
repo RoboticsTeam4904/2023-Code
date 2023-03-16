@@ -3,6 +3,7 @@ package org.usfirst.frc4904.robot.humaninterface.drivers;
 import org.usfirst.frc4904.robot.RobotMap;
 import org.usfirst.frc4904.standard.humaninput.Driver;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class NathanGain extends Driver {
@@ -23,6 +24,12 @@ public class NathanGain extends Driver {
 
 	@Override
 	public void bindCommands() {
+        RobotMap.Component.chassis.setDefaultCommand(
+            RobotMap.Component.chassis.c_controlChassisSpeedAndTurn(
+                () -> new Pair<Double, Double>(getX(), getTurnSpeed())
+                // () -> new Pair<Double, Double>(Robot.drivingConfig.getX(), Robot.drivingConfig.getTurnSpeed())
+                )
+            );
 	}
 
 	@Override
