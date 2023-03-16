@@ -31,11 +31,21 @@ public class Robot extends CommandRobotBase {
 
     @Override
     public void teleopInitialize() {
-        RobotMap.Component.chassis.setDefaultCommand(RobotMap.Component.chassis.c_controlChassisSpeedAndTurn(() -> new Pair<Double, Double>(Robot.drivingConfig.getX(), Robot.drivingConfig.getTurnSpeed())));
+        var controller = RobotMap.HumanInput.Driver.xbox;
+        var maxSpeed = 12;
+        RobotMap.Component.chassis.leftMotors.setBrakeOnNeutral();
+        RobotMap.Component.chassis.rightMotors.setBrakeOnNeutral();
+
+        // RobotMap.Component.chassis.setDefaultCommand(RobotMap.Component.chassis.c_controlChassisSpeedAndTurn(() -> new Pair<Double, Double>(Robot.drivingConfig.getX(), Robot.drivingConfig.getTurnSpeed())));
+        RobotMap.Component.chassis.c_controlWheelVoltages(() -> new DifferentialDriveWheelVoltages(
+            (controller.getRightTriggerAxis() - controller.getLeftTriggerAxis() + 1*controller.getLeftX())*maxSpeed,
+            (controller.getRightTriggerAxis() - controller.getLeftTriggerAxis() - 1*controller.getLeftX())*maxSpeed
+        )).schedule();
     }
 
     @Override
     public void teleopExecute() {
+        System.out.println(RobotMap.Component.chassis.leftMotors.leadMotor.get());
     }
 
     @Override
