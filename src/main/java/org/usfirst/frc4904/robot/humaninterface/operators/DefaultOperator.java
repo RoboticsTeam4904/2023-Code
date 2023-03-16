@@ -19,11 +19,11 @@ public class DefaultOperator extends Operator {
 
 	@Override
 	public void bindCommands() {
-        RobotMap.Component.arm.armPivotSubsystem.c_controlAngularVelocity(
-            () -> RobotMap.HumanInput.Operator.joystick.getAxis(1) / 4
-        ).schedule();
-        RobotMap.Component.arm.armExtensionSubsystem.c_controlVelocity(
-            () -> RobotMap.HumanInput.Operator.joystick.getAxis(2) * 0.5
-        ).schedule();
+        // RobotMap.Component.arm.armPivotSubsystem.c_controlAngularVelocity(
+        //     () -> RobotMap.HumanInput.Operator.joystick.getAxis(1) / 4
+        // ).schedule();
+        // RobotMap.Component.arm.armExtensionSubsystem.c_controlVelocity(
+        //     () -> RobotMap.HumanInput.Operator.joystick.getAxis(2) * 0.5
+        // ).schedule();
 	}
 }

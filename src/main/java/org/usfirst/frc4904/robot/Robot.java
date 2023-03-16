@@ -16,9 +16,10 @@ import org.usfirst.frc4904.robot.humaninterface.drivers.NathanGain;
 import org.usfirst.frc4904.robot.humaninterface.operators.DefaultOperator;
 // import org.usfirst.frc4904.robot.humaninterface.drivers.NathanGain;
 // import org.usfirst.frc4904.robot.humaninterface.operators.DefaultOperator;
-import org.usfirst.frc4904.robot.seenoevil.RobotContainer2;
-import org.usfirst.frc4904.robot.seenoevil.RobotContainer2.Component;
+// import org.usfirst.frc4904.robot.seenoevil.RobotContainer2;
+// import org.usfirst.frc4904.robot.seenoevil.RobotContainer2.Component;
 import org.usfirst.frc4904.standard.CommandRobotBase;
+import org.usfirst.frc4904.standard.humaninput.Driver;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -41,7 +42,8 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 public class Robot extends CommandRobotBase {
     private final RobotMap map = new RobotMap();
-    private final RobotContainer2 donttouchme = new RobotContainer2(RobotMap.Component.frontLeftWheelTalon, RobotMap.Component.backLeftWheelTalon, RobotMap.Component.frontRightWheelTalon, RobotMap.Component.backRightWheelTalon);
+    private final Driver nathan = new NathanGain();
+    // private final RobotContainer2 donttouchme = new RobotContainer2(RobotMap.Component.frontLeftWheelTalon, RobotMap.Component.backLeftWheelTalon, RobotMap.Component.frontRightWheelTalon, RobotMap.Component.backRightWheelTalon);
 
 
     @Override
@@ -56,32 +58,40 @@ public class Robot extends CommandRobotBase {
     public void teleopInitialize() {
         // TODO Auto-generated method stub
         
-        RobotMap.Component.chassis.setDefaultCommand(RobotMap.Component.chassis.c_controlChassisSpeedAndTurn(() -> new Pair<Double, Double>(Robot.drivingConfig.getX(), Robot.drivingConfig.getTurnSpeed())));
+        // RobotMap.Component.chassis.setDefaultCommand(
+        //     RobotMap.Component.chassis.c_controlChassisSpeedAndTurn(() -> new Pair<Double, Double>(nathan.getX(), nathan.getTurnSpeed()))
+        //     );
     }
 
     @Override
     public void teleopExecute() {
+        RobotMap.Component.chassis.leftMotors.set(0.4);
+
         // TODO Auto-generated method stub
         
     }
 
     @Override
     public void autonomousInitialize() {
-        RobotContainer2.Component.leftATalonFX.setNeutralMode(NeutralMode.Brake); 
-        RobotContainer2.Component.leftBTalonFX.setNeutralMode(NeutralMode.Brake); 
-        RobotContainer2.Component.rightATalonFX.setNeutralMode(NeutralMode.Brake); 
-        RobotContainer2.Component.rightBTalonFX.setNeutralMode(NeutralMode.Brake); 
-        RobotContainer2.Component.leftATalonFX.neutralOutput();
-        RobotContainer2.Component.leftBTalonFX.neutralOutput();
-        RobotContainer2.Component.rightATalonFX.neutralOutput();
-        RobotContainer2.Component.rightBTalonFX.neutralOutput();
-        final Trajectory trajectory = donttouchme.getTrajectory("straight_forward");
-        // donttouchme.getTrajectory("straight_backward");
-        final Trajectory trajectory2 = donttouchme.getTrajectory("turn_right");
-        // donttouchme.m_robotDrive.tankDriveVolts(5, 5);
-        // var command = new SequentialCommandGroup(donttouchme.getAutonomousCommand(trajectory), donttouchme.getAutonomousCommand(trajectory2));
-        var commnand = donttouchme.getAutonomousCommand(trajectory2);
-        commnand.schedule();
+        // RobotContainer2.Component.leftATalonFX.setNeutralMode(NeutralMode.Brake); 
+        // RobotContainer2.Component.leftBTalonFX.setNeutralMode(NeutralMode.Brake); 
+        // RobotContainer2.Component.rightATalonFX.setNeutralMode(NeutralMode.Brake); 
+        // RobotContainer2.Component.rightBTalonFX.setNeutralMode(NeutralMode.Brake); 
+        // RobotContainer2.Component.leftATalonFX.neutralOutput();
+        // RobotContainer2.Component.leftBTalonFX.neutralOutput();
+        // RobotContainer2.Component.rightATalonFX.neutralOutput();
+        // RobotContainer2.Component.rightBTalonFX.neutralOutput();
+        // final Trajectory trajectory = donttouchme.getTrajectory("straight_forward");
+        // // donttouchme.getTrajectory("straight_backward");
+        // final Trajectory trajectory2 = donttouchme.getTrajectory("turn_right");
+        // // donttouchme.m_robotDrive.tankDriveVolts(5, 5);
+        // // var command = new SequentialCommandGroup(donttouchme.getAutonomousCommand(trajectory), donttouchme.getAutonomousCommand(trajectory2));
+        // var commnand = donttouchme.getAutonomousCommand(trajectory2);
+        // commnand.schedule();
+
+
+
+        
         // var command2 = donttouchme.getAutonomousCommand(trajectory2);
         // command2.andThen(command).schedule();
         // command.andThen(Commands.runOnce(() -> donttouchme.getAutonomousCommand(trajectory))).schedule();
@@ -89,7 +99,7 @@ public class Robot extends CommandRobotBase {
 
     @Override
     public void autonomousExecute() {
-        SmartDashboard.putString("pose", donttouchme.m_robotDrive.getPose().toString());
+        // SmartDashboard.putString("pose", donttouchme.m_robotDrive.getPose().toString());
     }
 
     @Override

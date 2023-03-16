@@ -50,8 +50,8 @@ public class RobotMap {
         // }
 
         public static class HumanInput {
-            public static final int joystick = 0;
-            public static final int xboxController = 1;
+            public static final int joystick = 1;
+            public static final int xboxController = 0;
         }
 
         // blinky constants
@@ -195,58 +195,59 @@ public class RobotMap {
         Component.backRightWheelTalon  = new CANTalonFX(Port.CANMotor.RIGHT_DRIVE_A, InvertType.None);
         Component.frontRightWheelTalon = new CANTalonFX(Port.CANMotor.RIGHT_DRIVE_B, InvertType.FollowMaster);
         Component.backLeftWheelTalon   = new CANTalonFX(Port.CANMotor.LEFT_DRIVE_A, InvertType.InvertMotorOutput);
-        Component.backRightWheelTalon  = new CANTalonFX(Port.CANMotor.LEFT_DRIVE_B, InvertType.FollowMaster);
+        Component.frontLeftWheelTalon  = new CANTalonFX(Port.CANMotor.LEFT_DRIVE_B, InvertType.FollowMaster);
 
         TalonMotorSubsystem leftDriveMotors  = new TalonMotorSubsystem("left drive motors",  NeutralMode.Brake, 0, Component.frontLeftWheelTalon, Component.backLeftWheelTalon);
-        TalonMotorSubsystem rightDriveMotors = new TalonMotorSubsystem("right drive motors", NeutralMode.Brake, 0, Component.frontRightWheelTalon, Component.frontLeftWheelTalon);
+        TalonMotorSubsystem rightDriveMotors = new TalonMotorSubsystem("right drive motors", NeutralMode.Brake, 0, Component.frontRightWheelTalon, Component.backRightWheelTalon);
+
+
         Component.chassis = new WestCoastDrive(
             Metrics.Chassis.TRACK_WIDTH_METERS, Metrics.Chassis.GEAR_RATIO, Metrics.Chassis.WHEEL_DIAMETER_METERS,
             PID.Drive.kP, PID.Drive.kI, PID.Drive.kD,
             Component.navx, leftDriveMotors, rightDriveMotors
         );
 
-        Component.chassis.setDefaultCommand(Component.chassis.c_controlChassisSpeedAndTurn(() -> new Pair<Double, Double>(Robot.drivingConfig.getX(), Robot.drivingConfig.getTurnSpeed())));
 
 
-        /***********************
-         * Arm Subsystem
-        *************************/
+        // /***********************
+        //  * Arm Subsystem
+        // *************************/
 
-        CANTalonFX leftPivotMotor  = new CANTalonFX(RobotMap.Port.CANMotor.PIVOT_MOTOR_LEFT,  InvertType.None);
-        CANTalonFX rightPivotMotor = new CANTalonFX(RobotMap.Port.CANMotor.PIVOT_MOTOR_RIGHT, InvertType.OpposeMaster);
-        CANTalonFX armExtensionMotor = new CANTalonFX(Port.CANMotor.ARM_EXTENSION_MOTOR, InvertType.None);
+        // CANTalonFX leftPivotMotor  = new CANTalonFX(RobotMap.Port.CANMotor.PIVOT_MOTOR_LEFT,  InvertType.None);
+        // CANTalonFX rightPivotMotor = new CANTalonFX(RobotMap.Port.CANMotor.PIVOT_MOTOR_RIGHT, InvertType.OpposeMaster);
+        // CANTalonFX armExtensionMotor = new CANTalonFX(Port.CANMotor.ARM_EXTENSION_MOTOR, InvertType.None);
 
-        TalonMotorSubsystem armRotationMotors = new TalonMotorSubsystem("Arm Pivot Subsystem", NeutralMode.Brake, 0, leftPivotMotor, rightPivotMotor);
-        ArmExtensionSubsystem armExtensionSubsystem = new ArmExtensionSubsystem(
-            new TalonMotorSubsystem("Arm Extension Subsystem", NeutralMode.Brake, 0, armExtensionMotor),
-            () -> ArmPivotSubsystem.motorRevsToAngle(armRotationMotors.getSensorPositionRotations())
-        );
-        // Autonomous.autonCommand = Component.chassis.c_buildPathPlannerAuto(
-        //     PID.Drive.kS, PID.Drive.kV, PID.Drive.kA,
-        //     Autonomous.RAMSETE_B, Autonomous.RAMSETE_ZETA,
-        //     Autonomous.AUTON_NAME, Autonomous.MAX_VEL, Autonomous.MAX_ACCEL,
-        //     Autonomous.autonEventMap
+        // TalonMotorSubsystem armRotationMotors = new TalonMotorSubsystem("Arm Pivot Subsystem", NeutralMode.Brake, 0, leftPivotMotor, rightPivotMotor);
+        // ArmExtensionSubsystem armExtensionSubsystem = new ArmExtensionSubsystem(
+        //     new TalonMotorSubsystem("Arm Extension Subsystem", NeutralMode.Brake, 0, armExtensionMotor),
+        //     () -> ArmPivotSubsystem.motorRevsToAngle(armRotationMotors.getSensorPositionRotations())
         // );
+        // // Autonomous.autonCommand = Component.chassis.c_buildPathPlannerAuto(
+        // //     PID.Drive.kS, PID.Drive.kV, PID.Drive.kA,
+        // //     Autonomous.RAMSETE_B, Autonomous.RAMSETE_ZETA,
+        // //     Autonomous.AUTON_NAME, Autonomous.MAX_VEL, Autonomous.MAX_ACCEL,
+        // //     Autonomous.autonEventMap
+        // // );
 
-        ArmPivotSubsystem armPivotSubsystem = new ArmPivotSubsystem(armRotationMotors, armExtensionSubsystem::getCurrentExtensionLength);
+        // ArmPivotSubsystem armPivotSubsystem = new ArmPivotSubsystem(armRotationMotors, armExtensionSubsystem::getCurrentExtensionLength);
 
-        Component.arm = new ArmSubsystem(armPivotSubsystem, armExtensionSubsystem);
+        // Component.arm = new ArmSubsystem(armPivotSubsystem, armExtensionSubsystem);
 
-        armPivotSubsystem.initializeEncoderPositions();
-        // TODO: rotate the arm up into frame-perimeter rest
-        // TODO: armExtensionSubsystem.zeroSensors();
+        // armPivotSubsystem.initializeEncoderPositions();
+        // // TODO: rotate the arm up into frame-perimeter rest
+        // // TODO: armExtensionSubsystem.zeroSensors();
 
-        /***********************
-         * Intake Subsystem
-        *************************/
+        // /***********************
+        //  * Intake Subsystem
+        // *************************/
         
-        CustomCANSparkMax intake_left = new CustomCANSparkMax(Port.CANMotor.LEFT_INTAKE, null, false);
-        CustomCANSparkMax intake_right = new CustomCANSparkMax(Port.CANMotor.RIGHT_INTAKE, null, true);
-        SparkMaxMotorSubsystem intake_motors = new SparkMaxMotorSubsystem("intake", IdleMode.kCoast, 0, intake_left, intake_right);
-        Component.intake = new Intake(intake_motors);
+        // CustomCANSparkMax intake_left = new CustomCANSparkMax(Port.CANMotor.LEFT_INTAKE, null, false);
+        // CustomCANSparkMax intake_right = new CustomCANSparkMax(Port.CANMotor.RIGHT_INTAKE, null, true);
+        // SparkMaxMotorSubsystem intake_motors = new SparkMaxMotorSubsystem("intake", IdleMode.kCoast, 0, intake_left, intake_right);
+        // Component.intake = new Intake(intake_motors);
 
-        // links we'll need
-        // - angles and distances for intake/outtake: https://docs.google.com/spreadsheets/d/1B7Ie4efOpuZb4UQsk8lHycGvi6BspnF74DUMLmiKGUM/edit?usp=sharing
-        // - naive + scuffed ramsete tuning: https://docs.google.com/spreadsheets/d/1BIvwJ6MfLf9ByW9dcmagXFvm7HPaXY78Y4YB1L9TGPA/edit#gid=0
+        // // links we'll need
+        // // - angles and distances for intake/outtake: https://docs.google.com/spreadsheets/d/1B7Ie4efOpuZb4UQsk8lHycGvi6BspnF74DUMLmiKGUM/edit?usp=sharing
+        // // - naive + scuffed ramsete tuning: https://docs.google.com/spreadsheets/d/1BIvwJ6MfLf9ByW9dcmagXFvm7HPaXY78Y4YB1L9TGPA/edit#gid=0
     }
 }

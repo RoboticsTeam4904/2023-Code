@@ -15,6 +15,8 @@ public class NathanGain extends Driver {
 
 	public NathanGain() {
 		super("NathanGain");
+		System.out.println("nathangain got wheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
+
 	}
 
 	protected double scaleGain(double input, double gain, double exp) {
@@ -23,26 +25,32 @@ public class NathanGain extends Driver {
 
 	@Override
 	public void bindCommands() {
-		RobotMap.Component.chassis.setDefaultCommand(
-			RobotMap.Component.chassis.c_controlChassisVelocity(
-				() -> new ChassisSpeeds(getY(), getX(), getTurnSpeed())
-			)
-		);
+		// RobotMap.Component.chassis.setDefaultCommand(
+		// 	RobotMap.Component.chassis.c_controlChassisVelocity(
+		// 		() -> new ChassisSpeeds(getY(), getX(), getTurnSpeed())
+		// 	)
+		// );
 	}
 
 	@Override
 	public double getX() {
-		return 0;
+				//TODO: new getx is 0 to 1, old may have been -1 to 1 -- fix is simple if we need it
+
+		double rawSpeed = RobotMap.HumanInput.Driver.xbox.getRightTriggerAxis() - RobotMap.HumanInput.Driver.xbox.getLeftTriggerAxis();
+
+		double speed = scaleGain(rawSpeed, NathanGain.SPEED_GAIN, NathanGain.SPEED_EXP) * NathanGain.Y_SPEED_SCALE;
+		double precisionDrive = scaleGain(RobotMap.HumanInput.Driver.xbox.getLeftY(), 0.08, 1.2);
+		// double operatorDrive = scaleGain(-RobotMap.HumanInput.Operator.joystick.getAxis(1), 0.1, 1.2);
+
+		return speed + precisionDrive;// + operatorDrive;
 	}
 
 	@Override
 	public double getY() {
-		//TODO: new getx is 0 to 1, old may have been -1 to 1 -- fix is simple if we need it
-		double rawSpeed = RobotMap.HumanInput.Driver.xbox.getRightTriggerAxis() - RobotMap.HumanInput.Driver.xbox.getLeftTriggerAxis();
-		double speed = scaleGain(rawSpeed, NathanGain.SPEED_GAIN, NathanGain.SPEED_EXP) * NathanGain.Y_SPEED_SCALE;
-		double precisionDrive = scaleGain(RobotMap.HumanInput.Driver.xbox.getLeftY(), 0.08, 1.2);
-		double operatorDrive = scaleGain(-RobotMap.HumanInput.Operator.joystick.getAxis(1), 0.1, 1.2);
-		return speed + precisionDrive + operatorDrive;
+		System.out.println("nathangain got yyyyyyy");
+		return 0;
+
+		
 	}
 
 	@Override
