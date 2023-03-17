@@ -1,7 +1,7 @@
 package org.usfirst.frc4904.robot;
 
 import org.usfirst.frc4904.standard.custom.controllers.CustomCommandJoystick;
-
+import org.usfirst.frc4904.standard.custom.controllers.CustomCommandXbox;
 import org.usfirst.frc4904.standard.custom.motorcontrollers.CANTalonFX;
 
 import java.io.IOException;
@@ -161,7 +161,7 @@ public class RobotMap {
 
     public static class HumanInput {
         public static class Driver {
-            public static CommandXboxController xbox;
+            public static CustomCommandXbox xbox;
         }
 
         public static class Operator {
@@ -172,7 +172,7 @@ public class RobotMap {
     public RobotMap() {
         Component.navx = new AHRS(SerialPort.Port.kMXP);
 
-        HumanInput.Driver.xbox = new CommandXboxController(Port.HumanInput.xboxController);
+        HumanInput.Driver.xbox = new CustomCommandXbox(Port.HumanInput.xboxController, 0.1);
 		HumanInput.Operator.joystick = new CustomCommandJoystick(Port.HumanInput.joystick);
         // // UDP things
         // try {
