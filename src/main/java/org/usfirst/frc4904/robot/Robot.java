@@ -99,6 +99,7 @@ public class Robot extends CommandRobotBase {
     public void teleopExecute() {
         SmartDashboard.putBoolean("isFlipped - IMPORTANT", NathanGain.isFlippy);
         SmartDashboard.putNumber("gyroooo", RobotMap.Component.navx.getAngle());
+        SmartDashboard.putNumber("driverjoystick x", RobotMap.HumanInput.Driver.drivingJoystick.getX());
     }
 
     @Override

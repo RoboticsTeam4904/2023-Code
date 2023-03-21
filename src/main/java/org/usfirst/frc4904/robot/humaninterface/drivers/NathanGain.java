@@ -51,6 +51,7 @@ public class NathanGain extends Driver {
 		
 		RobotMap.HumanInput.Driver.xbox.y().onTrue(new InstantCommand(() -> NathanGain.precisionScaleY = 1));
 		RobotMap.HumanInput.Driver.xbox.y().onFalse(new InstantCommand(() -> NathanGain.precisionScaleY = NORMAL_SPEED_GAIN));
+		RobotMap.HumanInput.Driver.drivingJoystick.button1.onTrue(new InstantCommand(() -> System.out.println("\n\n\n\n\n\nButton 1 pressed\n\n\n\n\n\n\n")));
 	}
 
 	@Override
