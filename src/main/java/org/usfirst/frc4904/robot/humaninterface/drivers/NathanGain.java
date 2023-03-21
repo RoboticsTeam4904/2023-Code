@@ -8,17 +8,17 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 public class NathanGain extends Driver {
 	public static boolean isFlippy = false;
 	
-	public static final double SPEED_EXP = 2;
+	public static final double SPEED_EXP = 3.3;
 	public static final double Y_SPEED_SCALE = 1;
 
-	public static final double TURN_EXP = 1.2;
+	public static final double TURN_EXP = 3.8;
 	public static final double TURN_SPEED_SCALE = 1;
 
 
-	public static final double NORMAL_SPEED_GAIN = 0.7; // TODO TUNE
-	public static final double NORMAL_TURN_GAIN = 0.6;
+	public static final double NORMAL_SPEED_GAIN = 0.5; // TODO TUNE
+	public static final double NORMAL_TURN_GAIN = 0.45;
 
-	public static final double PRECISE_SPEED_SCALE = 0.4;	
+	public static final double PRECISE_SPEED_SCALE = 0.3;	
 	public static final double PRECISE_TURN_SCALE = 0.3;
 
 	// public static final double SPEEDY_TURN_GAIN = 0.7;

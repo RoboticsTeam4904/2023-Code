@@ -86,7 +86,7 @@ public class RobotMap {
 
         // // 2023-robot constants
         public static class Chassis {
-            public static final double GEAR_RATIO = 496/45; // https://www.desmos.com/calculator/llz7giggcf
+            public static final double GEAR_RATIO = 248/27; // https://www.desmos.com/calculator/llz7giggcf
             public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(5);
             public static final double TRACK_WIDTH_METERS = Units.inchesToMeters(19.5); // +/- 0.5 inches
             public static final double CHASSIS_LENGTH = Units.inchesToMeters(37); // +/- 0.5 inches
@@ -103,8 +103,8 @@ public class RobotMap {
             // feedforward constants
             // these are blinky constants from sysid on new drivetrain wednesday before 
             public static final double kS = 0.025236; 
-            public static final double kV = 3.0683;
-            public static final double kA = 0.7358;
+            public static final double kV = 3.0683 * (10.3/12);
+            public static final double kA = 0.7358 * (11.3/12);
         }
 
         public static class Turn {

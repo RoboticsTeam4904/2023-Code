@@ -24,6 +24,7 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import static org.usfirst.frc4904.robot.Utils.nameCommand;
@@ -65,19 +66,48 @@ public class Robot extends CommandRobotBase {
         //     RobotMap.Component.arm.c_posReturnToHomeUp(NathanGain.isFlippy)
         // ));
 
+    
+        double NORMAL_SPEED_GAIN = 0.5; // TODO TUNE
+        double NORMAL_TURN_GAIN = 0.6;
+    
+        double PRECISE_SPEED_SCALE = 0.4;	
+        double PRECISE_TURN_SCALE = 0.3;
+
         final DoubleSupplier pivot_getter = () -> RobotMap.HumanInput.Operator.joystick.getAxis(1) * 50;  
         (new Trigger(() -> pivot_getter.getAsDouble() != 0)).whileTrue(
             nameCommand("arm - teleop - armPivot operator override",
                 RobotMap.Component.arm.armPivotSubsystem.c_controlAngularVelocity(pivot_getter::getAsDouble)
             )
-        );
+        );		RobotMap.HumanInput.Driver.xbox.leftBumper().onTrue(new InstantCommand(
+			() -> {
+				NathanGain.precisionScaleY = PRECISE_SPEED_SCALE;
+				NathanGain.precisionScaleTurn = PRECISE_TURN_SCALE;
+			}
+		));
+		RobotMap.HumanInput.Driver.xbox.leftBumper().onFalse(new InstantCommand((	
+			) -> {
+				NathanGain.precisionScaleY = NORMAL_SPEED_GAIN;
+				NathanGain.precisionScaleTurn = NORMAL_TURN_GAIN;
+			}
+		));
+		
+		RobotMap.HumanInput.Driver.xbox.y().onTrue(new InstantCommand(() -> NathanGain.precisionScaleY = 1));
+		RobotMap.HumanInput.Driver.xbox.y().onFalse(new InstantCommand(() -> NathanGain.precisionScaleY = NORMAL_SPEED_GAIN));
+
+
 
         RobotMap.HumanInput.Operator.joystick.button3.onTrue(RobotMap.Component.arm.armExtensionSubsystem.c_controlVelocity(() -> -0.3));
         RobotMap.HumanInput.Operator.joystick.button3.onFalse(RobotMap.Component.arm.armExtensionSubsystem.c_controlVelocity(() -> 0));
 
         RobotMap.HumanInput.Operator.joystick.button5.onTrue(RobotMap.Component.arm.armExtensionSubsystem.c_controlVelocity(() -> 0.3));
         RobotMap.HumanInput.Operator.joystick.button5.onFalse(RobotMap.Component.arm.armExtensionSubsystem.c_controlVelocity(() -> 0));
+		
+        // position + place cube
+		RobotMap.HumanInput.Operator.joystick.button7.onTrue(RobotMap.Component.arm.armPivotSubsystem.c_holdRotation(22, 150, 200).getFirst());
+		RobotMap.HumanInput.Operator.joystick.button9.onTrue(RobotMap.Component.arm.armPivotSubsystem.c_holdRotation(18, 150, 200).getFirst());
+		RobotMap.HumanInput.Operator.joystick.button11.onTrue(RobotMap.Component.arm.armPivotSubsystem.c_holdRotation(-35, 150, 200).getFirst());
 
+		
 
         // Intake
 		// FIXME: use nameCommand to make it cleaner with expresions (no varibales) 
@@ -89,7 +119,7 @@ public class Robot extends CommandRobotBase {
         RobotMap.HumanInput.Operator.joystick.button2.onFalse(cmdnull);
 
 		// Outtake
-		var cmd1 = RobotMap.Component.intake.c_holdVoltage(3);
+		var cmd1 = RobotMap.Component.intake.c_holdVoltage(6.8);
 		cmd1.setName("Intake - manual outtake activation");
 		RobotMap.HumanInput.Operator.joystick.button1.onTrue(cmd1);
         RobotMap.HumanInput.Operator.joystick.button1.onFalse(cmdnull);
@@ -97,6 +127,7 @@ public class Robot extends CommandRobotBase {
 
     @Override
     public void teleopExecute() {
+        SmartDashboard.putNumber("Arm angle", RobotMap.Component.arm.armPivotSubsystem.getCurrentAngleDegrees());
         // SmartDashboard.putNumber("Controller out", RobotMap.HumanInput.Driver.xbox.getLeftX());
         // SmartDashboard.putNumber("Controller in trigger", RobotMap.HumanInput.Driver.xbox.getRightTriggerAxis());
 

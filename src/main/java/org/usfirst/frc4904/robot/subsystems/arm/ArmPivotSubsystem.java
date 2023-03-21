@@ -50,16 +50,17 @@ public class ArmPivotSubsystem extends SubsystemBase {
     public static final double kV = 1.98;
     public static final double kA = 0.03;
     
-    public static final double kG_retracted = 0.32;
-    public static final double kG_extended = 1.05;
+    public static final double kG_retracted = 0.3;
+    public static final double kG_extended = 0.98;
 
     // TODO: tune
     public static final double kP = 0.04;
-    public static final double kI = 0.01;
+    public static final double kI = 0.02;
     public static final double kD = 0;
 
 
 
+    
 
 
     public final TalonMotorSubsystem armMotorGroup;
@@ -112,7 +113,7 @@ public class ArmPivotSubsystem extends SubsystemBase {
                 Units.rotationsPerMinuteToRadiansPerSecond(Units.degreesToRotations(degPerSecDealer.getAsDouble()) * 60),
                 0
             );
-            SmartDashboard.putNumber("feedforward", ff);
+            // SmartDashboard.putNumber("feedforward", ff);
             for (var motor: this.armMotorGroup.followMotors) {
                 motor.setVoltage(ff);
             }
@@ -133,7 +134,7 @@ public class ArmPivotSubsystem extends SubsystemBase {
                     Units.degreesToRadians(velocityDegPerSec),
                     0
                 );
-                SmartDashboard.putNumber("Intended voltage", maxAccelDegPerSecSquare);
+                // SmartDashboard.putNumber("Intended voltage", maxAccelDegPerSecSquare);
                 return brr;
             }
         );
@@ -148,13 +149,13 @@ public class ArmPivotSubsystem extends SubsystemBase {
             () -> this.getCurrentAngleDegrees(),
             (volts) -> {
                 // this.armMotorGroup.setVoltage(volts); // FIXME : use motorgroup setvoltage
-                SmartDashboard.putNumber("Arm Volts", volts);
+                // SmartDashboard.putNumber("Arm Volts", volts);
                 this.armMotorGroup.leadMotor.setVoltage(volts);
                 for (var m : this.armMotorGroup.followMotors) m.setVoltage(volts);
             },
             (double t) -> {
-                SmartDashboard.putNumber("deg setpoint", profile.calculate(t).position);
-                SmartDashboard.putNumber("deg velocity", profile.calculate(t).velocity);
+                // SmartDashboard.putNumber("deg setpoint", profile.calculate(t).position);
+                // SmartDashboard.putNumber("deg velocity", profile.calculate(t).velocity);
                 return new Tuple2<Double>(profile.calculate(t).position, profile.calculate(t).velocity);
             },
         this, armMotorGroup);

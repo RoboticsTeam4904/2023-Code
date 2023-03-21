@@ -96,8 +96,8 @@ public class ArmExtensionSubsystem extends SubsystemBase {
                 Units.degreesToRadians(this.angleDealer_DEG.getAsDouble()),
                 metersPerSecondSupplier.getAsDouble()
             );
-            SmartDashboard.putNumber("arm extension ff", ff);
-            SmartDashboard.putNumber("extension velocity", revsToExtensionLength(motor.getSensorVelocityRPM()));
+            // SmartDashboard.putNumber("arm extension ff", ff);
+            // SmartDashboard.putNumber("extension velocity", revsToExtensionLength(motor.getSensorVelocityRPM()));
             setVoltageSafely(ff);
         });
         cmd.setName("arm - c_controlVelocity");
