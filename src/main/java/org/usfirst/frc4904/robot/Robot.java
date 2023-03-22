@@ -81,7 +81,8 @@ public class Robot extends CommandRobotBase {
 
     @Override
     public void teleopExecute() {
-        RobotMap.Component.chassis.arcadeDrive(-driver.getY(), driver.getX(), true);
+        //TODO: check chasis inversion?
+        RobotMap.Component.chassis.arcadeDrive(driver.getY(), driver.getTurnSpeed(), true);
     }
 
     @Override
