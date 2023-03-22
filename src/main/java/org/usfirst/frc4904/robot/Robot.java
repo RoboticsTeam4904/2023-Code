@@ -6,8 +6,10 @@
 /*----------------------------------------------------------------------------*/
 package org.usfirst.frc4904.robot;
 
+import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import org.usfirst.frc4904.robot.humaninterface.drivers.NathanGain;
 import org.usfirst.frc4904.robot.humaninterface.operators.DefaultOperator;
@@ -18,11 +20,16 @@ import org.usfirst.frc4904.standard.humaninput.Driver;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 import edu.wpi.first.math.controller.DifferentialDriveWheelVoltages;
-
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import static org.usfirst.frc4904.robot.Utils.nameCommand;
@@ -40,6 +47,8 @@ public class Robot extends CommandRobotBase {
 
     @Override
     public void teleopInitialize() {
+        driver.bindCommands();
+        operator.bindCommands();
         RobotMap.Component.frontLeftWheelTalon.setNeutralMode(NeutralMode.Brake); 
         RobotMap.Component.frontRightWheelTalon.setNeutralMode(NeutralMode.Brake);
         RobotMap.Component.backLeftWheelTalon.setNeutralMode(NeutralMode.Brake);
@@ -49,34 +58,8 @@ public class Robot extends CommandRobotBase {
         //     RobotMap.Component.arm.c_posReturnToHomeUp(NathanGain.isFlippy)
         // ));
 
-        final DoubleSupplier pivot_getter = () -> RobotMap.HumanInput.Operator.joystick.getAxis(1) * 40;  
-        (new Trigger(() -> pivot_getter.getAsDouble() != 0)).whileTrue(
-            nameCommand("arm - teleop - armPivot operator override",
-                RobotMap.Component.arm.armPivotSubsystem.c_controlAngularVelocity(pivot_getter::getAsDouble)
-            )
-        );
-
-        RobotMap.HumanInput.Operator.joystick.button3.onTrue(RobotMap.Component.arm.armExtensionSubsystem.c_controlVelocity(() -> -0.3));
-        RobotMap.HumanInput.Operator.joystick.button3.onFalse(RobotMap.Component.arm.armExtensionSubsystem.c_controlVelocity(() -> 0));
-
-        RobotMap.HumanInput.Operator.joystick.button5.onTrue(RobotMap.Component.arm.armExtensionSubsystem.c_controlVelocity(() -> 0.3));
-        RobotMap.HumanInput.Operator.joystick.button5.onFalse(RobotMap.Component.arm.armExtensionSubsystem.c_controlVelocity(() -> 0));
 
 
-        // Intake
-		// FIXME: use nameCommand to make it cleaner with expresions (no varibales) 
-		var cmd2 = RobotMap.Component.intake.c_holdVoltage(-8);
-		cmd2.setName("Intake - manual intake activation");
-		var cmdnull = RobotMap.Component.intake.c_holdVoltage(0);
-		cmdnull.setName("Intake - deactivated");
-		RobotMap.HumanInput.Operator.joystick.button2.onTrue(cmd2);
-        RobotMap.HumanInput.Operator.joystick.button2.onFalse(cmdnull);
-
-		// Outtake
-		var cmd1 = RobotMap.Component.intake.c_holdVoltage(3);
-		cmd1.setName("Intake - manual outtake activation");
-		RobotMap.HumanInput.Operator.joystick.button1.onTrue(cmd1);
-        RobotMap.HumanInput.Operator.joystick.button1.onFalse(cmdnull);
     }
 
     @Override
@@ -141,6 +124,41 @@ public class Robot extends CommandRobotBase {
         SmartDashboard.putNumber("Arm angle", RobotMap.Component.arm.armPivotSubsystem.getCurrentAngleDegrees());
         SmartDashboard.putNumber("gyroooo", RobotMap.Component.navx.getAngle());
     }
+
+    public Command balanceAutonAndShootCube(Supplier<DifferentialDriveWheelSpeeds> wheelSpeeds, BiConsumer<Double, Double> outputVolts){
+            
+        var command = new SequentialCommandGroup(     
+                //1. Position arm to place gamepiece
+                // TODO: options: either place the game picee, or try to flip over, shoot, and then come back so that we are in the same state
+
+                // implement going over and shooting a cone?
+
+            new ParallelCommandGroup(
+                //3. Retract arm
+                // RobotMap.Component.arm.c_posReturnToHomeDown(false),
+                RobotMap.Component.arm.armPivotSubsystem.c_holdRotation(180-15)
+                        .withTimeout(1) //TODO: tune
+                        .andThen(new WaitCommand(0.8))
+                        .andThen(RobotMap.Component.arm.armPivotSubsystem.c_holdRotation(0).withTimeout(1).andThen(new InstantCommand(() -> RobotMap.Component.arm.armPivotSubsystem.armMotorGroup.setVoltage(0)))
+                        ),
+                new SequentialCommandGroup(
+                    new WaitCommand(1), //TODO: tune
+                    RobotMap.Component.intake.c_holdVoltage(4.5).withTimeout(0.8).andThen(RobotMap.Component.intake.c_holdVoltage(0))
+                ),
+                new SequentialCommandGroup(
+                    new WaitCommand(2.5) //TODO: set wait time to allow arm to get started before moving?
+                    //4. Drive forward past ramp TODO: implement bangbang controller/splines
+
+                    //5. Drive back to get partially on ramp
+                )
+            )
+        //     new Balance(RobotMap.Component.navx, wheelSpeeds, outputVolts, 1, -0.1)
+            //6. balance code here
+        );
+        
+        return command;
+        }
+
 
 }
 

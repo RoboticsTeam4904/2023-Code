@@ -136,7 +136,7 @@ public class ArmPivotSubsystem extends SubsystemBase {
 
             ProfiledPIDController controller = new ProfiledPIDController(
                 kP, kI, kD,
-                new TrapezoidProfile.Constraints(5, 10)); //TODO: tune
+                new TrapezoidProfile.Constraints(150, 200)); //TODO: tune
             controller.setTolerance(0.01);
 
             double pidVal = controller.calculate(getCurrentAngleDegrees(), degreesFromHorizontal);
