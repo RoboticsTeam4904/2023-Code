@@ -11,7 +11,6 @@ import java.util.function.DoubleSupplier;
 
 import org.usfirst.frc4904.robot.humaninterface.drivers.NathanGain;
 import org.usfirst.frc4904.robot.humaninterface.operators.DefaultOperator;
-import org.usfirst.frc4904.robot.seenoevil.RobotContainer2;
 import org.usfirst.frc4904.robot.subsystems.arm.ArmPivotSubsystem;
 import org.usfirst.frc4904.standard.CommandRobotBase;
 import org.usfirst.frc4904.standard.humaninput.Driver;
@@ -31,7 +30,6 @@ import static org.usfirst.frc4904.robot.Utils.nameCommand;
 
 public class Robot extends CommandRobotBase {
     private final RobotMap map = new RobotMap();
-    private final RobotContainer2 donttouchme = new RobotContainer2(RobotMap.Component.frontLeftWheelTalon, RobotMap.Component.backLeftWheelTalon, RobotMap.Component.frontRightWheelTalon, RobotMap.Component.backRightWheelTalon, RobotMap.Component.navx);
 
     private final Driver driver = new NathanGain();
     private final org.usfirst.frc4904.standard.humaninput.Operator operator = new DefaultOperator();
@@ -42,25 +40,11 @@ public class Robot extends CommandRobotBase {
 
     @Override
     public void teleopInitialize() {
-        if (RobotContainer2.Component.leftATalonFX != null) RobotContainer2.Component.leftATalonFX.setNeutralMode(NeutralMode.Brake); 
-        if (RobotContainer2.Component.leftBTalonFX != null) RobotContainer2.Component.leftBTalonFX.setNeutralMode(NeutralMode.Brake); 
-        if (RobotContainer2.Component.rightATalonFX != null) RobotContainer2.Component.rightATalonFX.setNeutralMode(NeutralMode.Brake); 
-        if (RobotContainer2.Component.rightBTalonFX != null) RobotContainer2.Component.rightBTalonFX.setNeutralMode(NeutralMode.Brake); 
+        RobotMap.Component.frontLeftWheelTalon.setNeutralMode(NeutralMode.Brake); 
+        RobotMap.Component.frontRightWheelTalon.setNeutralMode(NeutralMode.Brake);
+        RobotMap.Component.backLeftWheelTalon.setNeutralMode(NeutralMode.Brake);
+        RobotMap.Component.backRightWheelTalon.setNeutralMode(NeutralMode.Brake);
         
-        // SATURDAY MORNING TEST - can you run drive train in queueline
-        // donttouchme.m_robotDrive.m_leftMotors = null;
-        // donttouchme.m_robotDrive.m_rightMotors = null;
-
-
-        final double TURN_MULTIPLIER = 1;
-        RobotMap.Component.chassis.setDefaultCommand(
-            nameCommand("chassis - Teleop_Default - c_controlWheelVoltages", 
-                RobotMap.Component.chassis.c_controlWheelVoltages(
-                    () -> new DifferentialDriveWheelVoltages(
-                        (driver.getY() + TURN_MULTIPLIER * driver.getTurnSpeed()) * 12,
-                        (driver.getY() - TURN_MULTIPLIER * driver.getTurnSpeed()) * 12
-        ))));
-
         // RobotMap.Component.arm.setDefaultCommand(nameCommand("arm - default command",
         //     RobotMap.Component.arm.c_posReturnToHomeUp(NathanGain.isFlippy)
         // ));
@@ -97,20 +81,15 @@ public class Robot extends CommandRobotBase {
 
     @Override
     public void teleopExecute() {
-        SmartDashboard.putBoolean("isFlipped - IMPORTANT", NathanGain.isFlippy);
-        SmartDashboard.putNumber("gyroooo", RobotMap.Component.navx.getAngle());
+        RobotMap.Component.chassis.arcadeDrive(-driver.getY(), driver.getX(), true);
     }
 
     @Override
     public void autonomousInitialize() {
-        if (RobotContainer2.Component.leftATalonFX != null)  RobotContainer2.Component.leftATalonFX.setNeutralMode(NeutralMode.Brake); 
-        if (RobotContainer2.Component.leftBTalonFX != null)  RobotContainer2.Component.leftBTalonFX.setNeutralMode(NeutralMode.Brake); 
-        if (RobotContainer2.Component.rightATalonFX != null) RobotContainer2.Component.rightATalonFX.setNeutralMode(NeutralMode.Brake); 
-        if (RobotContainer2.Component.rightBTalonFX != null) RobotContainer2.Component.rightBTalonFX.setNeutralMode(NeutralMode.Brake); 
-
-        // SATURDAY MORNING TEST: is the cube shooter auton gonna work
-        var commnand = donttouchme.balanceAuton(donttouchme.m_robotDrive::getWheelSpeeds, donttouchme.m_robotDrive::tankDriveVolts);
-        commnand.schedule();
+        RobotMap.Component.frontLeftWheelTalon.setNeutralMode(NeutralMode.Brake);
+        RobotMap.Component.frontRightWheelTalon.setNeutralMode(NeutralMode.Brake);
+        RobotMap.Component.backLeftWheelTalon.setNeutralMode(NeutralMode.Brake);
+        RobotMap.Component.backRightWheelTalon.setNeutralMode(NeutralMode.Brake);
     }
 
     @Override
@@ -119,13 +98,16 @@ public class Robot extends CommandRobotBase {
 
     @Override
     public void disabledInitialize() {
-        if (RobotContainer2.Component.leftATalonFX != null)  RobotContainer2.Component.leftATalonFX.setNeutralMode(NeutralMode.Brake); 
-        if (RobotContainer2.Component.leftBTalonFX != null)  RobotContainer2.Component.leftBTalonFX.setNeutralMode(NeutralMode.Brake); 
-        if (RobotContainer2.Component.rightATalonFX != null) RobotContainer2.Component.rightATalonFX.setNeutralMode(NeutralMode.Brake); 
-        if (RobotContainer2.Component.rightBTalonFX != null) RobotContainer2.Component.rightBTalonFX.setNeutralMode(NeutralMode.Brake); 
+        RobotMap.Component.frontLeftWheelTalon.setNeutralMode(NeutralMode.Coast);
+        RobotMap.Component.frontRightWheelTalon.setNeutralMode(NeutralMode.Coast);
+        RobotMap.Component.backLeftWheelTalon.setNeutralMode(NeutralMode.Coast);
+        RobotMap.Component.backRightWheelTalon.setNeutralMode(NeutralMode.Coast);
 
-        RobotMap.Component.arm.armPivotSubsystem.armMotorGroup.setBrakeOnNeutral();
-        RobotMap.Component.arm.armPivotSubsystem.armMotorGroup.neutralOutput();
+        RobotMap.Component.pivotMotorLeft.setNeutralMode(NeutralMode.Brake);
+        RobotMap.Component.pivotMotorLeft.neutralOutput();
+
+        RobotMap.Component.pivotMotorRight.setNeutralMode(NeutralMode.Brake);
+        RobotMap.Component.pivotMotorRight.neutralOutput();
     }
 
     @Override
@@ -134,13 +116,18 @@ public class Robot extends CommandRobotBase {
 
     @Override
     public void testInitialize() {
-        if (RobotContainer2.Component.leftATalonFX != null)  RobotContainer2.Component.leftATalonFX.setNeutralMode(NeutralMode.Coast); 
-        if (RobotContainer2.Component.leftBTalonFX != null)  RobotContainer2.Component.leftBTalonFX.setNeutralMode(NeutralMode.Coast); 
-        if (RobotContainer2.Component.rightATalonFX != null) RobotContainer2.Component.rightATalonFX.setNeutralMode(NeutralMode.Coast); 
-        if (RobotContainer2.Component.rightBTalonFX != null) RobotContainer2.Component.rightBTalonFX.setNeutralMode(NeutralMode.Coast); 
+        RobotMap.Component.frontLeftWheelTalon.setNeutralMode(NeutralMode.Coast);
+        RobotMap.Component.frontRightWheelTalon.setNeutralMode(NeutralMode.Coast);
+        RobotMap.Component.backLeftWheelTalon.setNeutralMode(NeutralMode.Coast);
+        RobotMap.Component.backRightWheelTalon.setNeutralMode(NeutralMode.Coast);
+
         RobotMap.Component.arm.armPivotSubsystem.initializeEncoderPositions();
-        RobotMap.Component.arm.armPivotSubsystem.armMotorGroup.setCoastOnNeutral();
-        RobotMap.Component.arm.armPivotSubsystem.armMotorGroup.neutralOutput();
+
+        RobotMap.Component.pivotMotorLeft.setNeutralMode(NeutralMode.Brake);
+        RobotMap.Component.pivotMotorLeft.neutralOutput();
+
+        RobotMap.Component.pivotMotorRight.setNeutralMode(NeutralMode.Brake);
+        RobotMap.Component.pivotMotorRight.neutralOutput();
     }
 
     @Override

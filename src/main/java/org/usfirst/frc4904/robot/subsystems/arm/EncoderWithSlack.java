@@ -2,11 +2,13 @@ package org.usfirst.frc4904.robot.subsystems.arm;
 
 import java.util.function.DoubleSupplier;
 
+import org.usfirst.frc4904.robot.RobotMap;
+
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class EncoderWithSlack extends SubsystemBase {   // just extends SubsystemBase so we can have a periodic
-    public final DoubleSupplier encoderRevsDealer;
+    public final DoubleSupplier encoderTicksSupplier;
     public final double slackWindow;
     public final double unitsPerRevolution;
     private double slackWindowDirection;
@@ -30,12 +32,12 @@ public class EncoderWithSlack extends SubsystemBase {   // just extends Subsyste
      *                            postively). Eg, false if you push the mechanism
      *                            negatively against a brake-mode motor to reset.
      */
-    public EncoderWithSlack(double slackWindowSize, DoubleSupplier encoderRevsSupplier, double unitsPerRevolution, boolean startsAtNegativeEnd) {
-        this.encoderRevsDealer = encoderRevsSupplier;
+    public EncoderWithSlack(double slackWindowSize, DoubleSupplier encoderTicksSupplier, double unitsPerRevolution, boolean startsAtNegativeEnd) {
+        this.encoderTicksSupplier = encoderTicksSupplier;
         this.slackWindow = slackWindowSize;
         this.unitsPerRevolution = unitsPerRevolution;
 
-        this.encoderPosition = this.encoderRevsDealer.getAsDouble() * unitsPerRevolution;
+        this.encoderPosition = this.encoderTicksSupplier.getAsDouble() * unitsPerRevolution * RobotMap.Metrics.TALON_ENCODER_COUNTS_PER_REV;
         this.zeroSlackDirection(startsAtNegativeEnd);
     }
     /**
@@ -55,7 +57,7 @@ public class EncoderWithSlack extends SubsystemBase {   // just extends Subsyste
 
     private double clamp(double value, double bound1, double bound2) { return Math.min(Math.max(value, Math.min(bound1, bound2)), Math.max(bound1, bound2)); }
     public void periodic() {    // automatically scheduled by SubsystemBase
-        var newEncoderPosition = encoderRevsDealer.getAsDouble() * unitsPerRevolution;
+        var newEncoderPosition = encoderTicksSupplier.getAsDouble() * unitsPerRevolution;
         var delta = newEncoderPosition - encoderPosition;
         encoderPosition = newEncoderPosition;
 

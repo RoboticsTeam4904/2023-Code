@@ -5,9 +5,11 @@ import org.usfirst.frc4904.standard.custom.controllers.CustomCommandXbox;
 import org.usfirst.frc4904.standard.custom.motorcontrollers.CANTalonFX;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.kauailabs.navx.frc.AHRS;
 
 import com.ctre.phoenix.motorcontrol.InvertType;
+import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -28,6 +30,8 @@ import org.usfirst.frc4904.standard.subsystems.motor.SparkMaxMotorSubsystem;
 import org.usfirst.frc4904.standard.subsystems.chassis.WestCoastDrive;
 import org.usfirst.frc4904.standard.subsystems.motor.TalonMotorSubsystem;
 import edu.wpi.first.wpilibj.SerialPort;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class RobotMap {
@@ -58,8 +62,8 @@ public class RobotMap {
             public static final int PIVOT_MOTOR_RIGHT = 12;
             public static final int ARM_EXTENSION_MOTOR = 14;
 
-            public static final int LEFT_INTAKE = 21;
-            public static final int RIGHT_INTAKE = 22;
+            public static final int LEFT_INTAKE_MOTOR = 21;
+            public static final int RIGHT_INTAKE_MOTOR = 22;
         }
 
         public static class PWM {
@@ -83,8 +87,10 @@ public class RobotMap {
         //     public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(4);
         //     public static final double TRACK_WIDTH_METERS = 0.59;
         // }
+        public static final int TALON_ENCODER_COUNTS_PER_REV = 2048;
 
         // // 2023-robot constants
+
         public static class Chassis {
             public static final double GEAR_RATIO = 496/45; // https://www.desmos.com/calculator/llz7giggcf
             public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(5);
@@ -96,15 +102,14 @@ public class RobotMap {
 
     public static class PID {
         public static class Drive {
-            // PID constants
-            public static final double kP = 1.5;
+            // PID constants (as of 3/20 characterization)
+            public static final double kP = 3.3016;
             public static final double kI = 0;  // FIXME: tune
             public static final double kD = 0;
-            // feedforward constants
-            // these are blinky constants from sysid on new drivetrain wednesday before 
-            public static final double kS = 0.025236; 
-            public static final double kV = 3.0683;
-            public static final double kA = 0.7358;
+            // feedforward constants (as of 3/20 characterization)
+            public static final double kS = 0.12507; 
+            public static final double kV = 2.9669;
+            public static final double kA = 0.67699;
         }
 
         public static class Turn {
@@ -112,19 +117,32 @@ public class RobotMap {
     }
 
     public static class Component {
-        // expose these for robotcontainer2
-        public static CANTalonFX frontLeftWheelTalon;
-        public static CANTalonFX frontRightWheelTalon;
-        public static CANTalonFX backLeftWheelTalon;
-        public static CANTalonFX backRightWheelTalon;
+        //chassis
+        public static WPI_TalonFX frontLeftWheelTalon;
+        public static WPI_TalonFX frontRightWheelTalon;
+        public static WPI_TalonFX backLeftWheelTalon;
+        public static WPI_TalonFX backRightWheelTalon;
 
+        //gyro
         public static AHRS navx;
 
-        // public static RobotUDP robotUDP;
 
-        public static WestCoastDrive chassis;
+        public static DifferentialDrive chassis;
+        
+        //arm
         public static ArmSubsystem arm;
+
+        public static ArmPivotSubsystem armPivot;
+        public static ArmExtensionSubsystem armExtension;
+
+        public static WPI_TalonFX pivotMotorLeft;
+        public static WPI_TalonFX pivotMotorRight;
+        public static WPI_TalonFX armExtensionMotor;
+
+        //intake
         public static Intake intake;
+        public static CANSparkMax leftIntakeMotor;
+        public static CANSparkMax rightIntakeMotor;
     }
 
     public static class NetworkTables {
@@ -149,7 +167,7 @@ public class RobotMap {
 
     public static class HumanInput {
         public static class Driver {
-            public static CustomCommandXbox xbox;
+            public static CommandXboxController xbox;
         }
 
         public static class Operator {
@@ -160,7 +178,7 @@ public class RobotMap {
     public RobotMap() {
         Component.navx = new AHRS(SerialPort.Port.kMXP);
 
-        HumanInput.Driver.xbox = new CustomCommandXbox(Port.HumanInput.xboxController, 0.1);
+        HumanInput.Driver.xbox = new CommandXboxController(Port.HumanInput.xboxController);
 		HumanInput.Operator.joystick = new CustomCommandJoystick(Port.HumanInput.joystick, 0.1);
         // // UDP things
         // try {
@@ -174,33 +192,46 @@ public class RobotMap {
         /***********************
          * Chassis Subsystem
         *************************/
+        Component.backLeftWheelTalon = new WPI_TalonFX(Port.CANMotor.LEFT_DRIVE_A);
+        Component.backLeftWheelTalon.setNeutralMode(NeutralMode.Brake);
 
-        Component.backRightWheelTalon  = new CANTalonFX(Port.CANMotor.RIGHT_DRIVE_A, InvertType.None);
-        Component.frontRightWheelTalon = new CANTalonFX(Port.CANMotor.RIGHT_DRIVE_B, InvertType.None);
-        Component.backLeftWheelTalon   = new CANTalonFX(Port.CANMotor.LEFT_DRIVE_A, InvertType.None);
-        Component.frontLeftWheelTalon  = new CANTalonFX(Port.CANMotor.LEFT_DRIVE_B, InvertType.None);
+        Component.frontLeftWheelTalon  = new WPI_TalonFX(Port.CANMotor.LEFT_DRIVE_B);
+        Component.frontLeftWheelTalon.setNeutralMode(NeutralMode.Brake);
 
-        TalonMotorSubsystem leftDriveMotors  = new TalonMotorSubsystem("left drive motors",  NeutralMode.Brake, 0, Component.frontLeftWheelTalon, Component.backLeftWheelTalon);
-        TalonMotorSubsystem rightDriveMotors = new TalonMotorSubsystem("right drive motors", NeutralMode.Brake, 0, Component.frontRightWheelTalon, Component.backRightWheelTalon);
-        Component.chassis = new WestCoastDrive(
-            Metrics.Chassis.TRACK_WIDTH_METERS, Metrics.Chassis.GEAR_RATIO, Metrics.Chassis.WHEEL_DIAMETER_METERS,
-            PID.Drive.kP, PID.Drive.kI, PID.Drive.kD,
-            Component.navx, leftDriveMotors, rightDriveMotors
+        MotorControllerGroup m_left  = new MotorControllerGroup(Component.frontLeftWheelTalon, Component.backLeftWheelTalon);
+        m_left.setInverted(true);
+
+
+        Component.backRightWheelTalon  = new WPI_TalonFX(Port.CANMotor.RIGHT_DRIVE_A);
+        Component.backRightWheelTalon.setNeutralMode(NeutralMode.Brake);
+
+        Component.frontRightWheelTalon = new WPI_TalonFX(Port.CANMotor.RIGHT_DRIVE_B);
+        Component.frontRightWheelTalon.setNeutralMode(NeutralMode.Brake);
+        
+        MotorControllerGroup m_right = new MotorControllerGroup(Component.frontRightWheelTalon, Component.backRightWheelTalon);
+
+        Component.chassis = new DifferentialDrive(
+            m_left,
+            m_right
         );
-
+        
 
         /***********************
          * Arm Subsystem
         *************************/
 
-        CANTalonFX leftPivotMotor  = new CANTalonFX(RobotMap.Port.CANMotor.PIVOT_MOTOR_LEFT,  InvertType.InvertMotorOutput);
-        CANTalonFX rightPivotMotor = new CANTalonFX(RobotMap.Port.CANMotor.PIVOT_MOTOR_RIGHT, InvertType.None);
-        CANTalonFX armExtensionMotor = new CANTalonFX(Port.CANMotor.ARM_EXTENSION_MOTOR, InvertType.None);
+        Component.pivotMotorLeft = new WPI_TalonFX(RobotMap.Port.CANMotor.PIVOT_MOTOR_LEFT);
+        Component.pivotMotorLeft.setInverted(true);
 
-        TalonMotorSubsystem armRotationMotors = new TalonMotorSubsystem("Arm Pivot Subsystem", NeutralMode.Brake, 0, leftPivotMotor, rightPivotMotor);
-        ArmExtensionSubsystem armExtensionSubsystem = new ArmExtensionSubsystem(
-            new TalonMotorSubsystem("Arm Extension Subsystem", NeutralMode.Brake, 0, armExtensionMotor),
-            () -> ArmPivotSubsystem.motorRevsToAngle(armRotationMotors.getSensorPositionRotations())
+        Component.pivotMotorRight = new WPI_TalonFX(RobotMap.Port.CANMotor.PIVOT_MOTOR_RIGHT);
+
+        MotorControllerGroup pivotMotors = new MotorControllerGroup(Component.pivotMotorLeft, Component.pivotMotorRight);
+
+        Component.armExtensionMotor = new WPI_TalonFX(Port.CANMotor.ARM_EXTENSION_MOTOR);
+
+        Component.armExtension = new ArmExtensionSubsystem(
+            Component.armExtensionMotor,
+            () -> ArmPivotSubsystem.motorRevsToAngle(Component.pivotMotorRight.getSelectedSensorPosition())
         );
         // Autonomous.autonCommand = Component.chassis.c_buildPathPlannerAuto(
         //     PID.Drive.kS, PID.Drive.kV, PID.Drive.kA,
@@ -209,18 +240,17 @@ public class RobotMap {
         //     Autonomous.autonEventMap
         // );
 
-        ArmPivotSubsystem armPivotSubsystem = new ArmPivotSubsystem(armRotationMotors, armExtensionSubsystem::getCurrentExtensionLength);
+        Component.armPivot = new ArmPivotSubsystem(pivotMotors, Component.pivotMotorRight, Component.armExtension::getCurrentExtensionLength);
 
-        Component.arm = new ArmSubsystem(armPivotSubsystem, armExtensionSubsystem);
+        Component.arm = new ArmSubsystem(Component.armPivot, Component.armExtension);
 
         /***********************
          * Intake Subsystem
         *************************/
-        
-        SparkMaxMotorSubsystem intake_left  = new SparkMaxMotorSubsystem("intake", IdleMode.kCoast, 0, new CustomCANSparkMax(Port.CANMotor.LEFT_INTAKE, MotorType.kBrushless, false));
-        SparkMaxMotorSubsystem intake_right = new SparkMaxMotorSubsystem("intake", IdleMode.kCoast, 0, new CustomCANSparkMax(Port.CANMotor.RIGHT_INTAKE, MotorType.kBrushless, true));
+        Component.leftIntakeMotor = new CANSparkMax(Port.CANMotor.LEFT_INTAKE_MOTOR, MotorType.kBrushless);
+        Component.rightIntakeMotor = new CANSparkMax(Port.CANMotor.RIGHT_INTAKE_MOTOR, MotorType.kBrushless);
+        Component.intake = new Intake(Component.leftIntakeMotor, Component.rightIntakeMotor);
 
-        Component.intake = new Intake(intake_left, intake_right);
                 
         // links we'll need
         // - angles and distances for intake/outtake: https://docs.google.com/spreadsheets/d/1B7Ie4efOpuZb4UQsk8lHycGvi6BspnF74DUMLmiKGUM/edit?usp=sharing

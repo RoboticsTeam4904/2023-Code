@@ -6,14 +6,20 @@ package org.usfirst.frc4904.robot.subsystems.arm;
 import java.util.function.DoubleSupplier;
 
 import org.opencv.core.Mat.Tuple2;
+import org.usfirst.frc4904.robot.RobotMap;
 import org.usfirst.frc4904.standard.custom.motioncontrollers.ezControl;
 import org.usfirst.frc4904.standard.custom.motioncontrollers.ezMotion;
 import org.usfirst.frc4904.standard.subsystems.motor.TalonMotorSubsystem;
+import org.usfirst.frc4904.standard.subsystems.motor.TelescopingArmExtensionFeedForward;
+
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -24,11 +30,11 @@ public class ArmExtensionSubsystem extends SubsystemBase {
 
     public static final double MAX_EXTENSION_M = Units.inchesToMeters(39.5);
     public static final double MIN_EXTENSION_M = 0;
-    private final TalonMotorSubsystem motor;
+    private final WPI_TalonFX motor;
     private final static double SPOOL_DIAMETER_M = Units.inchesToMeters(0.75);
     public final static double SPOOL_CIRCUMFERENCE_M = Math.PI * SPOOL_DIAMETER_M; // Math.PI * SPOOL_DIAMETER
     private final static double GEARBOX_RATIO = 12; // 12:1 
-    private final ArmFeedforward feedforward;
+    private final TelescopingArmExtensionFeedForward feedforward;
     private DoubleSupplier angleDealer_DEG;
    
     // TODO: recharacterize -- current values may be incorrect
@@ -47,9 +53,9 @@ public class ArmExtensionSubsystem extends SubsystemBase {
      *
      * @param motor the motor controller used to extend the arm
      */
-    public ArmExtensionSubsystem(TalonMotorSubsystem motor, DoubleSupplier angleDegreesDealer) {
+    public ArmExtensionSubsystem(WPI_TalonFX motor, DoubleSupplier angleDegreesDealer) {
         this.motor = motor;
-        this.feedforward = new ArmFeedforward(kS, kG, kV);
+        this.feedforward = new TelescopingArmExtensionFeedForward(kS, kG, kV, kA);
         this.angleDealer_DEG = angleDegreesDealer;
     }
     
@@ -58,16 +64,16 @@ public class ArmExtensionSubsystem extends SubsystemBase {
      *
      * @return the motor controller used to extend the arm
      */
-    public TalonMotorSubsystem getMotor() {
-        return motor;
+    public WPI_TalonFX getMotor() {
+        return this.motor;
     }
 
     public void initializeEncoderPositions(double meters) {
-        this.motor.zeroSensors(extensionLengthToRevs(meters));
+        this.motor.setSelectedSensorPosition(extensionLengthToRevs(meters) * RobotMap.Metrics.TALON_ENCODER_COUNTS_PER_REV);
     }
 
     public double getCurrentExtensionLength() {
-        return revsToExtensionLength(motor.getSensorPositionRotations());
+        return revsToExtensionLength(this.motor.getSelectedSensorPosition() / RobotMap.Metrics.TALON_ENCODER_COUNTS_PER_REV);
     }
 
     public void setVoltageSafely(double voltage) {
@@ -96,29 +102,34 @@ public class ArmExtensionSubsystem extends SubsystemBase {
                 Units.degreesToRadians(this.angleDealer_DEG.getAsDouble()),
                 metersPerSecondSupplier.getAsDouble()
             );
-            SmartDashboard.putNumber("arm extension ff", ff);
-            SmartDashboard.putNumber("extension velocity", revsToExtensionLength(motor.getSensorVelocityRPM()));
             setVoltageSafely(ff);
         });
         cmd.setName("arm - c_controlVelocity");
-        cmd.addRequirements(motor);
+        cmd.addRequirements(this);
         return cmd;
     }
 
-    public Pair<Command, Double> c_holdExtension(double extensionLengthMeters, double maxVelocity, double maxAcceleration) {
-        ezControl controller = new ezControl(kP, kI, kD, 
-                                            (double position, double velocity) -> this.feedforward.calculate(
-                                                Units.degreesToRadians(angleDealer_DEG.getAsDouble()) - Math.PI/2,
-                                                velocity,
-                                                0
-                                            ));
-        
-        TrapezoidProfile profile = new TrapezoidProfile(new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration), 
-                                                        new TrapezoidProfile.State(extensionLengthMeters, 0), 
-                                                        new TrapezoidProfile.State(getCurrentExtensionLength(), 0));
-        var cmd = new ezMotion(controller, this::getCurrentExtensionLength, motor::setVoltage, (double t) -> new Tuple2<Double>(profile.calculate(t).position, profile.calculate(t).velocity), this, motor);
-        cmd.setName("arm - c_holdExtension");
-        return new Pair<Command, Double>(cmd, profile.totalTime());
+    
+    public Command c_holdExtension(double extensionLengthMeters) {
+        var cmd = this.run(() -> {
+            double lastSpeed = 0;
+            double lastTime = Timer.getFPGATimestamp();
+
+            ProfiledPIDController controller = new ProfiledPIDController(
+                kP, kI, kD,
+                new TrapezoidProfile.Constraints(5, 10)); //TODO: tune
+            controller.setTolerance(0.01);
+
+            double pidVal = controller.calculate(getCurrentExtensionLength(), extensionLengthMeters);
+            double acceleration = (controller.getSetpoint().velocity - lastSpeed) / (Timer.getFPGATimestamp() - lastTime);
+            motor.setVoltage(
+                pidVal
+                + feedforward.calculate(controller.getSetpoint().velocity, acceleration));
+            lastSpeed = controller.getSetpoint().velocity;
+            lastTime = Timer.getFPGATimestamp();
+       });   
+
+       return cmd;
     }
 }
 
