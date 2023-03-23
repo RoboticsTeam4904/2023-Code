@@ -31,7 +31,7 @@ import static org.usfirst.frc4904.robot.Utils.nameCommand;
 
 public class Robot extends CommandRobotBase {
     private final RobotMap map = new RobotMap();
-    private final RobotContainer2 donttouchme = new RobotContainer2(RobotMap.Component.frontLeftWheelTalon, RobotMap.Component.backLeftWheelTalon, RobotMap.Component.frontRightWheelTalon, RobotMap.Component.backRightWheelTalon, RobotMap.Component.navx);
+    private RobotContainer2 donttouchme = new RobotContainer2(RobotMap.Component.frontLeftWheelTalon, RobotMap.Component.backLeftWheelTalon, RobotMap.Component.frontRightWheelTalon, RobotMap.Component.backRightWheelTalon, RobotMap.Component.navx);
 
     private final Driver driver = new NathanGain();
     private final org.usfirst.frc4904.standard.humaninput.Operator operator = new DefaultOperator();
@@ -50,6 +50,7 @@ public class Robot extends CommandRobotBase {
         // SATURDAY MORNING TEST - can you run drive train in queueline
         // donttouchme.m_robotDrive.m_leftMotors = null;
         // donttouchme.m_robotDrive.m_rightMotors = null;
+        // donttouchme = null;
 
 
         final double TURN_MULTIPLIER = 2;
@@ -97,6 +98,7 @@ public class Robot extends CommandRobotBase {
 
     @Override
     public void teleopExecute() {
+        SmartDashboard.putNumber("Extension Length", RobotMap.Component.arm.armExtensionSubsystem.getCurrentExtensionLength());
         // SmartDashboard.putNumber("Controller out", RobotMap.HumanInput.Driver.xbox.getLeftX());
         // SmartDashboard.putNumber("Controller in trigger", RobotMap.HumanInput.Driver.xbox.getRightTriggerAxis());
 
@@ -121,9 +123,9 @@ public class Robot extends CommandRobotBase {
         if (RobotContainer2.Component.rightATalonFX != null) RobotContainer2.Component.rightATalonFX.setNeutralMode(NeutralMode.Brake); 
         if (RobotContainer2.Component.rightBTalonFX != null) RobotContainer2.Component.rightBTalonFX.setNeutralMode(NeutralMode.Brake); 
 
-        // SATURDAY MORNING TEST: is the cube shooter auton gonna work
-        var commnand = donttouchme.balanceAutonAndShootCube(donttouchme.m_robotDrive::getWheelSpeeds, donttouchme.m_robotDrive::tankDriveVolts);
-        commnand.schedule();
+        // // SATURDAY MORNING TEST: is the cube shooter auton gonna work
+        // var commnand = donttouchme.balanceAutonAndShootCube(donttouchme.m_robotDrive::getWheelSpeeds, donttouchme.m_robotDrive::tankDriveVolts);
+        // commnand.schedule();
     }
 
     @Override

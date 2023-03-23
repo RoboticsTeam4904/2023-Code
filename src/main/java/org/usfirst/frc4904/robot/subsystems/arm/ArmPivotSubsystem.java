@@ -51,16 +51,12 @@ public class ArmPivotSubsystem extends SubsystemBase {
     public static final double kA = 0.03;
     
     public static final double kG_retracted = 0.32;
-    public static final double kG_extended = 1.05;
+    public static final double kG_extended = 3.2;
 
     // TODO: tune
     public static final double kP = 0.04;
     public static final double kI = 0.01;
     public static final double kD = 0;
-
-
-
-
 
     public final TalonMotorSubsystem armMotorGroup;
     public final TelescopingArmPivotFeedForward feedforward;
@@ -69,7 +65,7 @@ public class ArmPivotSubsystem extends SubsystemBase {
 
     public ArmPivotSubsystem(TalonMotorSubsystem armMotorGroup, DoubleSupplier extensionDealerMeters) {
         this.armMotorGroup = armMotorGroup;
-        this.extensionDealerMeters = () -> extensionDealerMeters.getAsDouble();
+        this.extensionDealerMeters = extensionDealerMeters;
         this.feedforward = new TelescopingArmPivotFeedForward(kG_retracted, kG_extended, kS, kV, kA);
         this.slackyEncoder = new EncoderWithSlack(
             GEARBOX_SLACK_DEGREES,
