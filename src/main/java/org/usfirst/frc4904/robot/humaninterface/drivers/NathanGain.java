@@ -21,6 +21,13 @@ public class NathanGain extends Driver {
 	public static final double PRECISE_SPEED_SCALE = 0.4;	
 	public static final double PRECISE_TURN_SCALE = 0.3;
 
+	public static final double INTAKE_SPEED_GAIN = 0; // TODO Add value
+	public static final double INTAKE_TURN_GAIN = 0; // TODO Add value
+
+	public static final double RAMP_BALANCE_SPEED_GAIN = 0; //TODO Add value
+	public static final double RAMP_BALANCE_TURN_GAIN = 0; // TODO Add value
+
+
 	// public static final double SPEEDY_TURN_GAIN = 0.7;
 
 	public static double precisionScaleY = NORMAL_SPEED_GAIN;
@@ -51,6 +58,32 @@ public class NathanGain extends Driver {
 		
 		RobotMap.HumanInput.Driver.xbox.y().onTrue(new InstantCommand(() -> NathanGain.precisionScaleY = 1));
 		RobotMap.HumanInput.Driver.xbox.y().onFalse(new InstantCommand(() -> NathanGain.precisionScaleY = NORMAL_SPEED_GAIN));
+
+		RobotMap.HumanInput.Driver.xbox.a().onTrue(new InstantCommand(
+			() -> {
+				NathanGain.precisionScaleY = INTAKE_SPEED_GAIN;
+				NathanGain.precisionScaleTurn = INTAKE_TURN_GAIN;
+			}
+		));
+		RobotMap.HumanInput.Driver.xbox.a().onFalse(new InstantCommand((	
+			) -> {
+				NathanGain.precisionScaleY = RAMP_BALANCE_SPEED_GAIN;
+				NathanGain.precisionScaleTurn = RAMP_BALANCE_TURN_GAIN;
+			}
+		));
+
+		RobotMap.HumanInput.Driver.xbox.b().onTrue(new InstantCommand(
+			() -> {
+				NathanGain.precisionScaleY = PRECISE_SPEED_SCALE;
+				NathanGain.precisionScaleTurn = PRECISE_TURN_SCALE;
+			}
+		));
+		RobotMap.HumanInput.Driver.xbox.b().onFalse(new InstantCommand((	
+			) -> {
+				NathanGain.precisionScaleY = NORMAL_SPEED_GAIN;
+				NathanGain.precisionScaleTurn = NORMAL_TURN_GAIN;
+			}
+		));
 	}
 
 	@Override
