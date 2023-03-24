@@ -6,13 +6,11 @@
 /*----------------------------------------------------------------------------*/
 package org.usfirst.frc4904.robot;
 
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import org.usfirst.frc4904.robot.humaninterface.drivers.NathanGain;
 import org.usfirst.frc4904.robot.humaninterface.operators.DefaultOperator;
 import org.usfirst.frc4904.robot.seenoevil.RobotContainer2;
-import org.usfirst.frc4904.robot.subsystems.arm.ArmPivotSubsystem;
 import org.usfirst.frc4904.standard.CommandRobotBase;
 import org.usfirst.frc4904.standard.humaninput.Driver;
 
@@ -20,10 +18,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 import edu.wpi.first.math.controller.DifferentialDriveWheelVoltages;
 
-import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import static org.usfirst.frc4904.robot.Utils.nameCommand;
@@ -32,7 +27,7 @@ import static org.usfirst.frc4904.robot.Utils.nameCommand;
 public class Robot extends CommandRobotBase {
     private final RobotMap map = new RobotMap();
     private final RobotContainer2 donttouchme = new RobotContainer2(RobotMap.Component.frontLeftWheelTalon, RobotMap.Component.backLeftWheelTalon, RobotMap.Component.frontRightWheelTalon, RobotMap.Component.backRightWheelTalon, RobotMap.Component.navx);
-
+    private final NathanGain nathangain = new NathanGain();
     private final Driver driver = new NathanGain();
     private final org.usfirst.frc4904.standard.humaninput.Operator operator = new DefaultOperator();
 
@@ -93,6 +88,7 @@ public class Robot extends CommandRobotBase {
 		cmd1.setName("Intake - manual outtake activation");
 		RobotMap.HumanInput.Operator.joystick.button1.onTrue(cmd1);
         RobotMap.HumanInput.Operator.joystick.button1.onFalse(cmdnull);
+        nathangain.bindCommands();
     }
 
     @Override
@@ -100,6 +96,7 @@ public class Robot extends CommandRobotBase {
         SmartDashboard.putBoolean("isFlipped - IMPORTANT", NathanGain.isFlippy);
         SmartDashboard.putNumber("gyroooo", RobotMap.Component.navx.getAngle());
         SmartDashboard.putNumber("driverjoystick x", RobotMap.HumanInput.Driver.drivingJoystick.getX());
+        SmartDashboard.putNumber("driverjoystick y", RobotMap.HumanInput.Driver.drivingJoystick.getY());
     }
 
     @Override
