@@ -16,6 +16,7 @@ import org.usfirst.frc4904.robot.subsystems.arm.ArmExtensionSubsystem;
 import org.usfirst.frc4904.robot.subsystems.arm.ArmPivotSubsystem;
 import org.usfirst.frc4904.robot.subsystems.arm.ArmSubsystem;
 
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -105,6 +106,14 @@ public class RobotMap {
             public static final double kS = 0.025236; 
             public static final double kV = 3.0683;
             public static final double kA = 0.7358;
+
+            public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(Metrics.Chassis.TRACK_WIDTH_METERS);
+
+            public static final double ramsete_b = 2;
+            public static final double ramsete_zeta = 0.7;
+
+            public static final double kMaxSpeedMetersPerSecond = 3.0; // max like 6mps
+            public static final double kMaxAccelerationMetersPerSecondSquared = 2.0;
         }
 
         public static class Turn {
