@@ -44,6 +44,30 @@ public class trajectoryConfigs {
                         RobotMap.PID.Drive.kDriveKinematics,
                         10))
                 .setReversed(true);
+        private static TrajectoryConfig trajectoryConfigSlow = new TrajectoryConfig(//TODO: add value for slow speed (and maybe accel)
+                RobotMap.PID.Drive.kMaxSpeedMetersPerSecond/3,
+                RobotMap.PID.Drive.kMaxAccelerationMetersPerSecondSquared/2)
+                .setKinematics(RobotMap.PID.Drive.kDriveKinematics)
+                .addConstraint(new DifferentialDriveVoltageConstraint(
+                        new SimpleMotorFeedforward(
+                                RobotMap.PID.Drive.kS,
+                                RobotMap.PID.Drive.kV,
+                                RobotMap.PID.Drive.kA),
+                        RobotMap.PID.Drive.kDriveKinematics,
+                        10))
+                .setReversed(true);
+        private static TrajectoryConfig trajectoryConfigSlowReversed = new TrajectoryConfig(
+                RobotMap.PID.Drive.kMaxSpeedMetersPerSecond/3,
+                RobotMap.PID.Drive.kMaxAccelerationMetersPerSecondSquared/2)
+                .setKinematics(RobotMap.PID.Drive.kDriveKinematics)
+                .addConstraint(new DifferentialDriveVoltageConstraint(
+                        new SimpleMotorFeedforward(
+                                RobotMap.PID.Drive.kS,
+                                RobotMap.PID.Drive.kV,
+                                RobotMap.PID.Drive.kA),
+                        RobotMap.PID.Drive.kDriveKinematics,
+                        10))
+                .setReversed(true);
         public static Map<String, Trajectory> trajectories = Map.ofEntries(
                 entry("sickle", TrajectoryGenerator.generateTrajectory(
                         // Start at the origin facing the +X direction
@@ -98,7 +122,7 @@ public class trajectoryConfigs {
                         new Pose2d(0,0,new Rotation2d(0)),
                         List.of(),
                         new Pose2d(Units.inchesToMeters(4.75)+placeholderconstant,0,new Rotation2d(0)),
-                        trajectoryConfig
+                        trajectoryConfigSlow
                 )),
                 entry("go_over_ramp", TrajectoryGenerator.generateTrajectory(
                         new Pose2d(0,0,new Rotation2d(0)),
@@ -110,7 +134,7 @@ public class trajectoryConfigs {
                         new Pose2d(0,0,new Rotation2d(Math.PI)),
                         List.of(),
                         new Pose2d(Units.inchesToMeters(4.75)+placeholderconstant,0,new Rotation2d(Math.PI)),
-                        trajectoryConfigReversed
+                        trajectoryConfigSlowReversed
                 )),
                 entry("go_middle_ramp", TrajectoryGenerator.generateTrajectory(
                         new Pose2d(0,0,new Rotation2d(Math.PI)),
