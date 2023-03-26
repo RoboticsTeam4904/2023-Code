@@ -13,10 +13,12 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
+import edu.wpi.first.math.util.Units;
 
 import org.usfirst.frc4904.robot.RobotMap;
 
 public class trajectoryConfigs {
+        private static double placeholderconstant = 0; //TODO: add value for starting to move onto the ramp
         private static TrajectoryConfig trajectoryConfig = new TrajectoryConfig(
                 RobotMap.PID.Drive.kMaxSpeedMetersPerSecond,
                 RobotMap.PID.Drive.kMaxAccelerationMetersPerSecondSquared)
@@ -82,6 +84,38 @@ public class trajectoryConfigs {
                         new Pose2d(0, 0, new Rotation2d(Math.PI)),
                         List.of(),
                         new Pose2d(1, 0, new Rotation2d(Math.PI)),
+                        trajectoryConfigReversed
+                )),
+
+                //new auton
+                entry("to_ramp", TrajectoryGenerator.generateTrajectory(
+                        new Pose2d(0,0, new Rotation2d(0)),
+                        List.of(),
+                        new Pose2d(Units.inchesToMeters(24.19),0,new Rotation2d(0)),
+                        trajectoryConfig
+                )),
+                entry("angle_ramp_forward", TrajectoryGenerator.generateTrajectory(
+                        new Pose2d(0,0,new Rotation2d(0)),
+                        List.of(),
+                        new Pose2d(Units.inchesToMeters(4.75)+placeholderconstant,0,new Rotation2d(0)),
+                        trajectoryConfig
+                )),
+                entry("go_over_ramp", TrajectoryGenerator.generateTrajectory(
+                        new Pose2d(0,0,new Rotation2d(0)),
+                        List.of(),
+                        new Pose2d(Units.inchesToMeters(118.02)+placeholderconstant,0,new Rotation2d(0)),
+                        trajectoryConfig
+                )),
+                entry("angle_ramp_backward", TrajectoryGenerator.generateTrajectory(
+                        new Pose2d(0,0,new Rotation2d(Math.PI)),
+                        List.of(),
+                        new Pose2d(Units.inchesToMeters(4.75)+placeholderconstant,0,new Rotation2d(Math.PI)),
+                        trajectoryConfigReversed
+                )),
+                entry("go_middle_ramp", TrajectoryGenerator.generateTrajectory(
+                        new Pose2d(0,0,new Rotation2d(Math.PI)),
+                        List.of(),
+                        new Pose2d(Units.inchesToMeters(53.5)+placeholderconstant,0,new Rotation2d(Math.PI)),
                         trajectoryConfigReversed
                 ))
         );

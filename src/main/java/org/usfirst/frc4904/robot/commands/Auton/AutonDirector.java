@@ -146,5 +146,40 @@ public class AutonDirector { //replaces seenoevil, hopefully
             
             return command;
             }
+            public Command newShootBalanceAuton() {
+                var command = new SequentialCommandGroup(     
+                        //1. Position arm to place gamepiece
+                        // TODO: options: either place the game picee, or try to flip over, shoot, and then come back so that we are in the same state
+        
+                        // implement going over and shooting a cone?
+        
+                    new ParallelCommandGroup(
+                        //3. Retract arm
+                        // RobotMap.Component.arm.c_posReturnToHomeDown(false),
+                        RobotMap.Component.arm.armPivotSubsystem.c_holdRotation(180-15, 150, 200).getFirst(),
+                        new SequentialCommandGroup(
+                            new WaitCommand(RobotMap.Component.arm.armPivotSubsystem.c_holdRotation(180-15, 150, 200).getSecond()),
+                            RobotMap.Component.intake.c_holdVoltage(4.5).withTimeout(0.5),
+                            RobotMap.Component.arm.armPivotSubsystem.c_holdRotation(0, 150, 150).getFirst().withTimeout(0.8)
+                        ),
+                        
+                        new SequentialCommandGroup(
+                            new WaitCommand(RobotMap.Component.arm.armPivotSubsystem.c_holdRotation(180-15, 150, 200).getSecond()+0.5),
+                            runSpline(getTrajectory("to_ramp")),
+                            runSpline(getTrajectory("angle_ramp_forward")),
+                            new WaitCommand(2),
+                            runSpline(getTrajectory("go_over_ramp")),
+                            runSpline(getTrajectory("angle_ramp_backward")),
+                            new WaitCommand(2),
+                            runSpline(getTrajectory("go_middle_ramp"))
+                        )
+                    )
+                //     new Balance(RobotMap.Component.navx, wheelSpeeds, outputVolts, 1, -0.1)
+                    //6. balance code here
+                );
+                
+                return command;
+
+        }
 
 }
