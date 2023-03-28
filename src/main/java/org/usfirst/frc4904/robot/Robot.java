@@ -98,6 +98,7 @@ public class Robot extends CommandRobotBase {
     public void autonomousInitialize() {
         // SATURDAY MORNING TEST: is the cube shooter auton gonna work
         var autonomousCommand = autonDirector.balanceAuton(autonDirector.m_robotDrive::getWheelSpeeds, autonDirector.m_robotDrive::setWheelVoltages);
+        //var autonomousCommand = 
         autonomousCommand.schedule();
     }
 

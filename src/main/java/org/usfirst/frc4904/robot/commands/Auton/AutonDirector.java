@@ -181,5 +181,13 @@ public class AutonDirector { //replaces seenoevil, hopefully
                 return command;
 
         }
+        public Command splineTest(){
+            var command = new SequentialCommandGroup(
+                runSpline(getTrajectory("go_over_ramp")),
+                new WaitCommand(1),
+                runSpline(getTrajectory("go_middle_ramp"))
+            ); 
+            return command;
+        }
 
 }
