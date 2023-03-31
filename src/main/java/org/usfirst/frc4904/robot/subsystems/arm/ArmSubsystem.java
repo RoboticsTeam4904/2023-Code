@@ -113,7 +113,7 @@ public class ArmSubsystem extends SubsystemBase {
             .alongWith(new WaitCommand(1).andThen(RobotMap.Component.intake.c_holdVoltage(Intake.DEFAULT_INTAKE_VOLTS))
         )).withTimeout(5); //TODO: change timeout
     }
-    public Command c_angleCones(int shelf) {
+    public Command placeCones(int shelf) {
         var degreesFromHorizontal = cones.get(shelf).getFirst();
         var extensionLengthMeters = cones.get(shelf).getSecond();
         
