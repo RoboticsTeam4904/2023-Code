@@ -97,7 +97,8 @@ public class Robot extends CommandRobotBase {
     @Override
     public void autonomousInitialize() {
         // SATURDAY MORNING TEST: is the cube shooter auton gonna work
-        var autonomousCommand = autonDirector.balanceAuton(autonDirector.m_robotDrive::getWheelSpeeds, autonDirector.m_robotDrive::setWheelVoltages);
+        // var autonomousCommand = autonDirector.balanceAuton(autonDirector.m_robotDrive::getWheelSpeeds, autonDirector.m_robotDrive::setWheelVoltages);
+        var autonomousCommand = autonDirector.splineTest();
         //var autonomousCommand = 
         autonomousCommand.schedule();
     }
