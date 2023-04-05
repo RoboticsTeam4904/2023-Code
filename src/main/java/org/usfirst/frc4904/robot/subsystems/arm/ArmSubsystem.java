@@ -109,7 +109,8 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public Command c_shootCones(int shelf) { return c_shootCones(shelf, null); }
-    public Command c_shootCones(int shelf, Supplier<Command> onArrivalCommandDealer) {
+    public Command c_shootCones(int shelf, Supplier<Command> onArrivalCommandDealer) { return c_shootCones(shelf, true, onArrivalCommandDealer); }
+    public Command c_shootCones(int shelf, boolean stow, Supplier<Command> onArrivalCommandDealer) {
         var degreesFromHorizontal = cones.get(shelf).getFirst();
         var extensionLengthMeters = cones.get(shelf).getSecond();
         var voltage = cones.get(shelf).getThird();
@@ -122,7 +123,7 @@ public class ArmSubsystem extends SubsystemBase {
         return c_holdArmPose(degreesFromHorizontal, extensionLengthMeters,
             () -> new SequentialCommandGroup(
                 RobotMap.Component.intake.c_holdVoltage(voltage).withTimeout(0.5),
-                RobotMap.Component.intake.c_neutralOutput(), c_posReturnToHomeUp(onArrivalCommandDealer)
+                RobotMap.Component.intake.c_neutralOutput(), stow ? c_posReturnToHomeUp(onArrivalCommandDealer) : new Noop()
             ) 
         );
     }
@@ -135,7 +136,9 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public Command c_shootCubes(int shelf) { return c_shootCubes(shelf, null); }
-    public Command c_shootCubes(int shelf, Supplier<Command> onArrivalCommandDealer) {
+    public Command c_shootCubes(int shelf, Supplier<Command> onArrivalCommandDealer) { return c_shootCubes(shelf, true, onArrivalCommandDealer); }
+    
+    public Command c_shootCubes(int shelf, boolean stow, Supplier<Command> onArrivalCommandDealer) {
         var degreesFromHorizontal = cubes.get(shelf).getFirst();
         var extensionLengthMeters = cubes.get(shelf).getSecond();
         var voltage = cubes.get(shelf).getThird();
@@ -143,7 +146,7 @@ public class ArmSubsystem extends SubsystemBase {
         return c_holdArmPose(degreesFromHorizontal, extensionLengthMeters,
             () -> new SequentialCommandGroup(
                     RobotMap.Component.intake.c_holdVoltage(voltage).withTimeout(0.5),
-                    RobotMap.Component.intake.c_neutralOutput(), c_posReturnToHomeUp(onArrivalCommandDealer)
+                    RobotMap.Component.intake.c_neutralOutput(), stow ? c_posReturnToHomeUp(onArrivalCommandDealer): new Noop()
             )
         );
     }
