@@ -64,7 +64,7 @@ public class Robot extends CommandRobotBase {
 
     @Override
     public void teleopExecute() {
-        //TODO: check chasis inversion?
+        //TODO: check chassis inversion?
         RobotMap.Component.chassis.arcadeDrive(driver.getY(), driver.getTurnSpeed(), true);
     }
 
@@ -124,40 +124,6 @@ public class Robot extends CommandRobotBase {
         SmartDashboard.putNumber("Arm angle", RobotMap.Component.arm.armPivotSubsystem.getCurrentAngleDegrees());
         SmartDashboard.putNumber("gyroooo", RobotMap.Component.navx.getAngle());
     }
-
-    public Command balanceAutonAndShootCube(Supplier<DifferentialDriveWheelSpeeds> wheelSpeeds, BiConsumer<Double, Double> outputVolts){
-            
-        var command = new SequentialCommandGroup(     
-                //1. Position arm to place gamepiece
-                // TODO: options: either place the game picee, or try to flip over, shoot, and then come back so that we are in the same state
-
-                // implement going over and shooting a cone?
-
-            new ParallelCommandGroup(
-                //3. Retract arm
-                // RobotMap.Component.arm.c_posReturnToHomeDown(false),
-                RobotMap.Component.arm.armPivotSubsystem.c_holdRotation(180-15)
-                        .withTimeout(1) //TODO: tune
-                        .andThen(new WaitCommand(0.8))
-                        .andThen(RobotMap.Component.arm.armPivotSubsystem.c_holdRotation(0).withTimeout(1).andThen(new InstantCommand(() -> RobotMap.Component.arm.armPivotSubsystem.armMotorGroup.setVoltage(0)))
-                        ),
-                new SequentialCommandGroup(
-                    new WaitCommand(1), //TODO: tune
-                    RobotMap.Component.intake.c_holdVoltage(4.5).withTimeout(0.8).andThen(RobotMap.Component.intake.c_holdVoltage(0))
-                ),
-                new SequentialCommandGroup(
-                    new WaitCommand(2.5) //TODO: set wait time to allow arm to get started before moving?
-                    //4. Drive forward past ramp TODO: implement bangbang controller/splines
-
-                    //5. Drive back to get partially on ramp
-                )
-            )
-        //     new Balance(RobotMap.Component.navx, wheelSpeeds, outputVolts, 1, -0.1)
-            //6. balance code here
-        );
-        
-        return command;
-        }
 
 
 }

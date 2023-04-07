@@ -36,13 +36,13 @@ public class NathanGain extends Driver {
 
 	@Override
 	public void bindCommands() {
-		RobotMap.HumanInput.Driver.xbox.leftBumper().onTrue(new InstantCommand(
+		RobotMap.HumanInput.Driver.xbox.x().onTrue(new InstantCommand(
 			() -> {
 				NathanGain.precisionScaleY = PRECISE_SPEED_SCALE;
 				NathanGain.precisionScaleTurn = PRECISE_TURN_SCALE;
 			}
 		));
-		RobotMap.HumanInput.Driver.xbox.leftBumper().onFalse(new InstantCommand((	
+		RobotMap.HumanInput.Driver.xbox.x().onFalse(new InstantCommand((	
 			) -> {
 				NathanGain.precisionScaleY = NORMAL_SPEED_GAIN;
 				NathanGain.precisionScaleTurn = NORMAL_TURN_GAIN;
@@ -51,6 +51,8 @@ public class NathanGain extends Driver {
 		
 		RobotMap.HumanInput.Driver.xbox.y().onTrue(new InstantCommand(() -> NathanGain.precisionScaleY = 1));
 		RobotMap.HumanInput.Driver.xbox.y().onFalse(new InstantCommand(() -> NathanGain.precisionScaleY = NORMAL_SPEED_GAIN));
+
+		
 	}
 
 	@Override

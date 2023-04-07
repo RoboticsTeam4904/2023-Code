@@ -28,24 +28,22 @@ public class ArmExtensionSubsystem extends SubsystemBase {
     public static final double MAXIMUM_HORIZONTAL_SAFE_EXTENSION_M = Units.inchesToMeters(48);
     public static final double ADDITIONAL_LENGTH_M = Units.inchesToMeters(30.71);
 
-    public static final double MAX_EXTENSION_M = Units.inchesToMeters(39.5);
+    public static final double MAX_EXTENSION_M = 0.902;
     public static final double MIN_EXTENSION_M = 0;
-    private final WPI_TalonFX motor;
-    private final static double SPOOL_DIAMETER_M = Units.inchesToMeters(0.75);
-    public final static double SPOOL_CIRCUMFERENCE_M = Math.PI * SPOOL_DIAMETER_M; // Math.PI * SPOOL_DIAMETER
-    private final static double GEARBOX_RATIO = 12; // 12:1 
-    private final TelescopingArmExtensionFeedForward feedforward;
+    public final WPI_TalonFX motor;
+    public final static double SPOOL_CIRCUMFERENCE_M = Math.PI * Units.inchesToMeters(0.75); // Math.PI * SPOOL_DIAMETER
+    private final static double GEARBOX_RATIO = 4.3; // this number gives accurate values formerly 12:1
+    private final ArmFeedforward feedforward;
     private DoubleSupplier angleDealer_DEG;
    
-    // TODO: recharacterize -- current values may be incorrect
-    public static final double kS = 0.21679;
-    public static final double kV = 8.2054;
-    public static final double kA = 0.17697;
-    public static final double kG = 0.26169;
+    public static final double kS = 0.14072;
+    public static final double kV = 7.8821;
+    public static final double kA = 0.45821;
+    public static final double kG = 0.18613;
 
     // TODO: tune
-    public static final double kP = 0.01;
-    public static final double kI = 0.001;
+    public static final double kP = 2.2;
+    public static final double kI = 0.1;
     public static final double kD = 0;
     
     /**
@@ -55,7 +53,7 @@ public class ArmExtensionSubsystem extends SubsystemBase {
      */
     public ArmExtensionSubsystem(WPI_TalonFX motor, DoubleSupplier angleDegreesDealer) {
         this.motor = motor;
-        this.feedforward = new TelescopingArmExtensionFeedForward(kS, kG, kV, kA);
+        this.feedforward = new ArmFeedforward(kS, kG, kV, kA);
         this.angleDealer_DEG = angleDegreesDealer;
     }
     
@@ -110,14 +108,14 @@ public class ArmExtensionSubsystem extends SubsystemBase {
     }
 
     
-    public Command c_holdExtension(double extensionLengthMeters) {
+    public Command c_holdExtension(double extensionLengthMeters, double maxVelocity, double maxAcceleration) {
         var cmd = this.run(() -> {
             double lastSpeed = 0;
             double lastTime = Timer.getFPGATimestamp();
 
             ProfiledPIDController controller = new ProfiledPIDController(
                 kP, kI, kD,
-                new TrapezoidProfile.Constraints(5, 10)); //TODO: tune
+                new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration)); //TODO: tune
             controller.setTolerance(0.01);
 
             double pidVal = controller.calculate(getCurrentExtensionLength(), extensionLengthMeters);
@@ -130,6 +128,13 @@ public class ArmExtensionSubsystem extends SubsystemBase {
        });   
 
        return cmd;
+    }
+    public boolean isArmAtExtension(double extensionLengthMeters) {
+        if (getCurrentExtensionLength() >= extensionLengthMeters - .1 && getCurrentExtensionLength() <= extensionLengthMeters + .1) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 

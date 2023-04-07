@@ -17,18 +17,31 @@ public class Intake extends SubsystemBase {
         this.rightMotor = rightMotor;
 
         // FIXME: actual current limits (55 is way high)
-        leftMotor.setSmartCurrentLimit(55);
+        // FIXME: actual current limits (55 is way high)
         rightMotor.setSmartCurrentLimit(55);
+        leftMotor.setSmartCurrentLimit(55);
     }
     public void setVoltage(double voltage) {
         leftMotor.setVoltage(voltage);
-        rightMotor.setVoltage(-1.3*voltage);
+        rightMotor.setVoltage(-voltage);
+    }
+
+    public Command c_neutralOutput() {
+        return Commands.runOnce(() -> {
+            leftMotor.stopMotor();
+            rightMotor.stopMotor();;
+        });
     }
     public Command c_holdVoltage(double voltage) {
-        var cmd = this.run(() -> {
+        return Commands.run(() -> {
             setVoltage(voltage);
         });
-        return cmd;
+    }
+    public Command c_startIntake() {
+        return c_holdVoltage(-8);
+    }
+    public Command c_holdItem() {
+        return c_holdVoltage(-2).withTimeout(0.5).andThen(c_holdVoltage(-1.6));
     }
 
     public Command c_holdVoltageDefault() {

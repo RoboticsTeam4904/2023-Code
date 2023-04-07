@@ -49,19 +49,24 @@ public class ArmPivotSubsystem extends SubsystemBase {
     // constants for big sprocket, assuming it's 4x the little sprocket
     public static final double GEARBOX_RATIO = 48 * 60/26; // big sprocket
     public static final double GEARBOX_SLACK_DEGREES = 6;    // todo
-    public static final double MAX_EXTENSION_M = Units.inchesToMeters(39.5);
-    public static final double MIN_EXTENSION_M = 0;
 
-    public static final double kS = 0;
-    public static final double kV = 1.98;
-    public static final double kA = 0.03;
+    public static final double kS = 0.10126;
+    // public static final double kS_extended = .20586;
+
+    
+    public static final double kV = 1.8894;
+    // public static final double kV_extended = 1.7361;
+
+
+    public static final double kA = 0.048547; //extended: .12082
+    // public static final double kA_extended = .12082;
     
     public static final double kG_retracted = 0.32;
-    public static final double kG_extended = 1.05;
+    public static final double kG_extended = 0.6;
 
     // TODO: tune
-    public static final double kP = 0.04;
-    public static final double kI = 0.01;
+    public static final double kP = 0.06;//;//0.04; //extended: .36915 retracted: .01464
+    public static final double kI = 0.02;//0.01;
     public static final double kD = 0;
 
 
@@ -72,19 +77,13 @@ public class ArmPivotSubsystem extends SubsystemBase {
     public final TelescopingArmPivotFeedForward feedforward;
     public final DoubleSupplier extensionDealerMeters;
     public final WPI_TalonFX encoder;
-    private final EncoderWithSlack slackyEncoder;
 
     public ArmPivotSubsystem(MotorControllerGroup armMotorGroup, WPI_TalonFX encoder, DoubleSupplier extensionDealerMeters) {
         this.armMotorGroup = armMotorGroup;
         this.encoder = encoder;
         this.extensionDealerMeters = () -> extensionDealerMeters.getAsDouble();
         this.feedforward = new TelescopingArmPivotFeedForward(kG_retracted, kG_extended, kS, kV, kA);
-        this.slackyEncoder = new EncoderWithSlack(
-            GEARBOX_SLACK_DEGREES,
-            () -> encoder.getSelectedSensorPosition(),
-            Units.rotationsToDegrees(1/GEARBOX_RATIO),
-            true
-        );
+
     }
 
     public double getCurrentAngleDegrees() {
@@ -98,7 +97,6 @@ public class ArmPivotSubsystem extends SubsystemBase {
      */
     public void initializeEncoderPositions() {
         encoder.setSelectedSensorPosition(angleToMotorRevs(HARD_STOP_ARM_ANGLE) * RobotMap.Metrics.TALON_ENCODER_COUNTS_PER_REV);
-        slackyEncoder.zeroSlackDirection(true);
     }
 
     public static double motorRevsToAngle(double revs) {
@@ -115,7 +113,7 @@ public class ArmPivotSubsystem extends SubsystemBase {
     public Command c_controlAngularVelocity(DoubleSupplier degPerSecDealer) {
         var cmd = this.run(() -> {
             var ff = this.feedforward.calculate(
-                extensionDealerMeters.getAsDouble()/MAX_EXTENSION_M,
+                extensionDealerMeters.getAsDouble()/ArmExtensionSubsystem.MAX_EXTENSION_M,
                 Units.degreesToRadians(getCurrentAngleDegrees()),
                 Units.rotationsPerMinuteToRadiansPerSecond(Units.degreesToRotations(degPerSecDealer.getAsDouble()) * 60),
                 0
@@ -129,21 +127,29 @@ public class ArmPivotSubsystem extends SubsystemBase {
         return cmd;
     }
 
-    public Command c_holdRotation(double degreesFromHorizontal) {
+    public boolean isArmAtRotation(double armRotationDegrees) {
+        if (getCurrentAngleDegrees() >= armRotationDegrees - 2 && getCurrentAngleDegrees() <= armRotationDegrees + 2) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public Command c_holdRotation(double degreesFromHorizontal, double maxVelocity, double maxAcceleration) {
         var cmd = this.run(() -> {
             double lastSpeed = 0;
             double lastTime = Timer.getFPGATimestamp();
 
             ProfiledPIDController controller = new ProfiledPIDController(
                 kP, kI, kD,
-                new TrapezoidProfile.Constraints(150, 200)); //TODO: tune
+                new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration)); //TODO: tune
             controller.setTolerance(0.01);
 
             double pidVal = controller.calculate(getCurrentAngleDegrees(), degreesFromHorizontal);
             double acceleration = (controller.getSetpoint().velocity - lastSpeed) / (Timer.getFPGATimestamp() - lastTime);
             armMotorGroup.setVoltage(
                 pidVal
-                + feedforward.calculate(extensionDealerMeters.getAsDouble()/MAX_EXTENSION_M, 
+                + feedforward.calculate(extensionDealerMeters.getAsDouble()/ArmExtensionSubsystem.MAX_EXTENSION_M, 
                 Units.degreesToRadians(getCurrentAngleDegrees()),
                 controller.getSetpoint().velocity, acceleration));
             lastSpeed = controller.getSetpoint().velocity;
