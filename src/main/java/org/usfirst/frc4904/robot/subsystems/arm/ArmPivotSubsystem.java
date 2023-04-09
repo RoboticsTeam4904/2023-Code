@@ -12,6 +12,7 @@ import org.usfirst.frc4904.standard.subsystems.motor.TelescopingArmPivotFeedForw
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
@@ -19,12 +20,12 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class ArmPivotSubsystem extends SubsystemBase {
+public class ArmPivotSubsystem extends ProfiledPIDSubsystem {
     public static final double HARD_STOP_ARM_ANGLE = -38;
-    public static final double HARD_STOP_BACK = (HARD_STOP_ARM_ANGLE* -1) + 180; 
-
+    public static final double HARD_STOP_BACK = (HARD_STOP_ARM_ANGLE* -1) + 180;
 
     // constants for small sprocket
     // public static final double GEARBOX_RATIO = 48; //48:1, 48 rotations of motor = 360 degrees
@@ -53,6 +54,9 @@ public class ArmPivotSubsystem extends SubsystemBase {
     public static final double kS = 0.10126;
     // public static final double kS_extended = .20586;
 
+    public static final double MAX_VELOCITY_PIVOT = 160;
+    public static final double MAX_ACCEL_PIVOT = 210;
+
     
     public static final double kV = 1.8894;
     // public static final double kV_extended = 1.7361;
@@ -69,20 +73,32 @@ public class ArmPivotSubsystem extends SubsystemBase {
     public static final double kI = 0.02;//0.01;
     public static final double kD = 0;
 
+    public enum ArmMode {
+        VELOCITY , POSITION, DISABLED
+    }
+
+    private ArmMode armMode;
+    private double radiansPerSecond;
+
 
 
 
 
     public final MotorControllerGroup armMotorGroup;
-    public final TelescopingArmPivotFeedForward feedforward;
     public final DoubleSupplier extensionDealerMeters;
     public final WPI_TalonFX encoder;
 
+    private final TelescopingArmPivotFeedForward pivotFeedForward = new TelescopingArmPivotFeedForward(kG_retracted, kG_extended, kS, kV, kA);
+
     public ArmPivotSubsystem(MotorControllerGroup armMotorGroup, WPI_TalonFX encoder, DoubleSupplier extensionDealerMeters) {
+        super(new ProfiledPIDController(kP, kI, kD, 
+        new TrapezoidProfile.Constraints(MAX_VELOCITY_PIVOT, MAX_ACCEL_PIVOT)));
         this.armMotorGroup = armMotorGroup;
         this.encoder = encoder;
         this.extensionDealerMeters = () -> extensionDealerMeters.getAsDouble();
-        this.feedforward = new TelescopingArmPivotFeedForward(kG_retracted, kG_extended, kS, kV, kA);
+        armMode = ArmMode.DISABLED;
+
+        setGoal(HARD_STOP_ARM_ANGLE);
 
     }
 
@@ -109,24 +125,6 @@ public class ArmPivotSubsystem extends SubsystemBase {
         return angle / (360/GEARBOX_RATIO);
     }
 
-
-    public Command c_controlAngularVelocity(DoubleSupplier degPerSecDealer) {
-        var cmd = this.run(() -> {
-            var ff = this.feedforward.calculate(
-                extensionDealerMeters.getAsDouble()/ArmExtensionSubsystem.MAX_EXTENSION_M,
-                Units.degreesToRadians(getCurrentAngleDegrees()),
-                Units.rotationsPerMinuteToRadiansPerSecond(Units.degreesToRotations(degPerSecDealer.getAsDouble()) * 60),
-                0
-            );
-            SmartDashboard.putNumber("feedforward", ff);
-
-            armMotorGroup.setVoltage(ff);
-        });
-        cmd.addRequirements(this);
-        cmd.setName("arm - c_controlAngularVelocity");
-        return cmd;
-    }
-
     public boolean isArmAtRotation(double armRotationDegrees) {
         if (getCurrentAngleDegrees() >= armRotationDegrees - 2 && getCurrentAngleDegrees() <= armRotationDegrees + 2) {
             return true;
@@ -135,27 +133,42 @@ public class ArmPivotSubsystem extends SubsystemBase {
         }
     }
 
-    public Command c_holdRotation(double degreesFromHorizontal, double maxVelocity, double maxAcceleration) {
-        var cmd = this.run(() -> {
-            double lastSpeed = 0;
-            double lastTime = Timer.getFPGATimestamp();
+    @Override
+    public void useOutput(double output, TrapezoidProfile.State setpoint) {
+      // Calculate the feedforward from the sepoint
+      double feedforward = pivotFeedForward.calculate(extensionDealerMeters.getAsDouble()/ArmExtensionSubsystem.MAX_EXTENSION_M, Units.degreesToRadians(getCurrentAngleDegrees()), setpoint.velocity, 0);
+      // Add the feedforward to the PID output to get the motor output
+      armMotorGroup.setVoltage(output + feedforward);
+    }
 
-            ProfiledPIDController controller = new ProfiledPIDController(
-                kP, kI, kD,
-                new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration)); //TODO: tune
-            controller.setTolerance(0.01);
+    @Override
+    public double getMeasurement() {
+        return Units.degreesToRadians(getCurrentAngleDegrees());
+    }
 
-            double pidVal = controller.calculate(getCurrentAngleDegrees(), degreesFromHorizontal);
-            double acceleration = (controller.getSetpoint().velocity - lastSpeed) / (Timer.getFPGATimestamp() - lastTime);
-            armMotorGroup.setVoltage(
-                pidVal
-                + feedforward.calculate(extensionDealerMeters.getAsDouble()/ArmExtensionSubsystem.MAX_EXTENSION_M, 
-                Units.degreesToRadians(getCurrentAngleDegrees()),
-                controller.getSetpoint().velocity, acceleration));
-            lastSpeed = controller.getSetpoint().velocity;
-            lastTime = Timer.getFPGATimestamp();
-       });   
+    public void setVelocity(Double radiansPerSecond) {
+        this.armMode = ArmMode.VELOCITY;
+        this.radiansPerSecond = radiansPerSecond;
+    }
 
-       return cmd;
+    public void setArmAngleRadians(double radians) {
+        this.armMode = ArmMode.POSITION;
+        setGoal(radians);
+    }
+
+    @Override
+    public void periodic() {
+        // This method will be called once per scheduler run
+        switch(armMode) {
+            case POSITION:
+                useOutput(m_controller.calculate(getMeasurement()), m_controller.getSetpoint());
+                break;
+            case VELOCITY:
+                armMotorGroup.setVoltage(pivotFeedForward.calculate(extensionDealerMeters.getAsDouble()/ArmExtensionSubsystem.MAX_EXTENSION_M, Units.degreesToRadians(getCurrentAngleDegrees()), radiansPerSecond, 0));
+                break;
+            case DISABLED:
+                armMotorGroup.stopMotor();
+                break;
+        };
     }
 }

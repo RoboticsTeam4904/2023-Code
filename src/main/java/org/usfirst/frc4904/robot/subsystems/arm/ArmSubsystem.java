@@ -11,7 +11,7 @@ import org.usfirst.frc4904.robot.humaninterface.drivers.NathanGain;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
-
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -145,16 +145,15 @@ public class ArmSubsystem extends SubsystemBase {
 
     public Command c_holdArmPose(double degreesFromHorizontal, double extensionLengthMeters) {        
         if (extensionLengthMeters > armExtensionSubsystem.getCurrentExtensionLength()) {
-            return armExtensionSubsystem.c_holdExtension(extensionLengthMeters, MAX_VELOCITY_EXTENSION, MAX_ACCEL_EXTENSION).alongWith(
+            return new InstantCommand(() -> armExtensionSubsystem.setArmExtension(extensionLengthMeters)).alongWith(
                new WaitUntilCommand(() -> armExtensionSubsystem.isArmAtExtension(extensionLengthMeters))
-               .andThen(armPivotSubsystem.c_holdRotation(degreesFromHorizontal, MAX_VELOCITY_PIVOT, MAX_ACCEL_PIVOT))
+               .andThen(new InstantCommand(() -> armPivotSubsystem.setArmAngleRadians(Units.degreesToRadians(degreesFromHorizontal))))
             );
         } else {
-            return armPivotSubsystem.c_holdRotation(degreesFromHorizontal, MAX_VELOCITY_PIVOT, MAX_ACCEL_PIVOT).alongWith(
+            return new InstantCommand(() -> armPivotSubsystem.setArmAngleRadians(Units.degreesToRadians(degreesFromHorizontal))).alongWith(
                 new WaitUntilCommand(() -> armPivotSubsystem.isArmAtRotation(degreesFromHorizontal))
-                .andThen(armExtensionSubsystem.c_holdExtension(extensionLengthMeters, MAX_VELOCITY_EXTENSION, MAX_VELOCITY_PIVOT))
+                .andThen(new InstantCommand(() -> armExtensionSubsystem.setArmExtension(extensionLengthMeters)))
             );
-            // return armPivotSubsystem.c_holdRotation(degreesFromHorizontal).withTimeout(1).andThen(armExtensionSubsystem.c_holdExtension(extensionLengthMeters));
         }
     }
 }

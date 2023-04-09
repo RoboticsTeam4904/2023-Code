@@ -22,9 +22,10 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class ArmExtensionSubsystem extends SubsystemBase {
+public class ArmExtensionSubsystem extends ProfiledPIDSubsystem {
     public static final double MAXIMUM_HORIZONTAL_SAFE_EXTENSION_M = Units.inchesToMeters(48);
     public static final double ADDITIONAL_LENGTH_M = Units.inchesToMeters(30.71);
 
@@ -33,8 +34,10 @@ public class ArmExtensionSubsystem extends SubsystemBase {
     public final WPI_TalonFX motor;
     public final static double SPOOL_CIRCUMFERENCE_M = Math.PI * Units.inchesToMeters(0.75); // Math.PI * SPOOL_DIAMETER
     private final static double GEARBOX_RATIO = 4.3; // this number gives accurate values formerly 12:1
-    private final ArmFeedforward feedforward;
     private DoubleSupplier angleDealer_DEG;
+
+    public static final double MAX_VELOCITY_EXTENSION = 1.5;
+    public static final double MAX_ACCEL_EXTENSION = 3;
    
     public static final double kS = 0.14072;
     public static final double kV = 7.8821;
@@ -45,6 +48,19 @@ public class ArmExtensionSubsystem extends SubsystemBase {
     public static final double kP = 2.2;
     public static final double kI = 0.1;
     public static final double kD = 0;
+
+    public enum ElevatorMode {
+        VELOCITY , POSITION, DISABLED
+    }
+
+    private ElevatorMode extensionMode;
+    private double metersPerSecond;
+
+
+    private final ArmFeedforward extensionfeedforward =
+        new ArmFeedforward(
+            kS, kG, kV, kA
+            );
     
     /**
      * Constructs a new ArmExtension subsystem.
@@ -52,9 +68,58 @@ public class ArmExtensionSubsystem extends SubsystemBase {
      * @param motor the motor controller used to extend the arm
      */
     public ArmExtensionSubsystem(WPI_TalonFX motor, DoubleSupplier angleDegreesDealer) {
+        super(
+            new ProfiledPIDController(
+                kP, kI, kD,
+                new TrapezoidProfile.Constraints(MAX_VELOCITY_EXTENSION, MAX_ACCEL_EXTENSION) //TODO: tune
+            )
+        );
         this.motor = motor;
-        this.feedforward = new ArmFeedforward(kS, kG, kV, kA);
+        metersPerSecond = 0;
         this.angleDealer_DEG = angleDegreesDealer;
+        extensionMode = ElevatorMode.DISABLED;
+
+
+        setGoal(MIN_EXTENSION_M);
+    }
+
+    public void setVelocity(double metersPerSecond) {
+        this.extensionMode = ElevatorMode.VELOCITY;
+        this.metersPerSecond = metersPerSecond;
+    }
+
+    public void setArmExtension(double meters) {
+        this.extensionMode = extensionMode.POSITION;
+        setGoal(meters);
+    }
+
+    @Override
+    public void useOutput(double output, TrapezoidProfile.State setpoint) {
+      // Calculate the feedforward from the sepoint
+      double feedforward = extensionfeedforward.calculate(Units.degreesToRadians(this.angleDealer_DEG.getAsDouble()), setpoint.velocity);
+      // Add the feedforward to the PID output to get the motor output
+      motor.setVoltage(output + feedforward);
+    }
+
+    @Override
+    public double getMeasurement() {
+      return getCurrentExtensionLength();
+    }
+
+    @Override
+    public void periodic() {
+        switch(extensionMode) {
+            case DISABLED:
+                motor.stopMotor();
+                break;
+            case POSITION:
+                useOutput(m_controller.calculate(getMeasurement()), m_controller.getSetpoint());
+                break;
+            case VELOCITY:
+                motor.setVoltage(extensionfeedforward.calculate(Units.degreesToRadians(this.angleDealer_DEG.getAsDouble()),
+                metersPerSecond));
+                break;
+        }
     }
     
     /**
@@ -94,41 +159,6 @@ public class ArmExtensionSubsystem extends SubsystemBase {
         return extension_meters / SPOOL_CIRCUMFERENCE_M * GEARBOX_RATIO;
     }
 
-    public Command c_controlVelocity(DoubleSupplier metersPerSecondSupplier) {
-        var cmd = this.run(() -> {
-            var ff = this.feedforward.calculate(
-                Units.degreesToRadians(this.angleDealer_DEG.getAsDouble()),
-                metersPerSecondSupplier.getAsDouble()
-            );
-            setVoltageSafely(ff);
-        });
-        cmd.setName("arm - c_controlVelocity");
-        cmd.addRequirements(this);
-        return cmd;
-    }
-
-    
-    public Command c_holdExtension(double extensionLengthMeters, double maxVelocity, double maxAcceleration) {
-        var cmd = this.run(() -> {
-            double lastSpeed = 0;
-            double lastTime = Timer.getFPGATimestamp();
-
-            ProfiledPIDController controller = new ProfiledPIDController(
-                kP, kI, kD,
-                new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration)); //TODO: tune
-            controller.setTolerance(0.01);
-
-            double pidVal = controller.calculate(getCurrentExtensionLength(), extensionLengthMeters);
-            double acceleration = (controller.getSetpoint().velocity - lastSpeed) / (Timer.getFPGATimestamp() - lastTime);
-            motor.setVoltage(
-                pidVal
-                + feedforward.calculate(controller.getSetpoint().velocity, acceleration));
-            lastSpeed = controller.getSetpoint().velocity;
-            lastTime = Timer.getFPGATimestamp();
-       });   
-
-       return cmd;
-    }
     public boolean isArmAtExtension(double extensionLengthMeters) {
         if (getCurrentExtensionLength() >= extensionLengthMeters - .1 && getCurrentExtensionLength() <= extensionLengthMeters + .1) {
             return true;
