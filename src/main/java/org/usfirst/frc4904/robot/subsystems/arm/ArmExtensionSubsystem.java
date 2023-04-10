@@ -89,7 +89,7 @@ public class ArmExtensionSubsystem extends ProfiledPIDSubsystem {
     }
 
     public void setArmExtension(double meters) {
-        this.extensionMode = extensionMode.POSITION;
+        this.extensionMode = ElevatorMode.POSITION;
         setGoal(meters);
     }
 
@@ -136,7 +136,7 @@ public class ArmExtensionSubsystem extends ProfiledPIDSubsystem {
     }
 
     public double getCurrentExtensionLength() {
-        return revsToExtensionLength(this.motor.getSelectedSensorPosition() / RobotMap.Metrics.TALON_ENCODER_COUNTS_PER_REV);
+        return (revsToExtensionLength(this.motor.getSelectedSensorPosition() / RobotMap.Metrics.TALON_ENCODER_COUNTS_PER_REV) * 0.968) - 0.0853;
     }
 
     public void setVoltageSafely(double voltage) {

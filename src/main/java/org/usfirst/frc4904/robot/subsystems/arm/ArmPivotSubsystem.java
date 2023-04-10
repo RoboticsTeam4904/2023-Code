@@ -104,7 +104,7 @@ public class ArmPivotSubsystem extends ProfiledPIDSubsystem {
 
     public double getCurrentAngleDegrees() {
         // return slackyEncoder.getRealPosition();
-        return motorRevsToAngle(encoder.getSelectedSensorPosition() * RobotMap.Metrics.TALON_ENCODER_COUNTS_PER_REV);
+        return (motorRevsToAngle(encoder.getSelectedSensorPosition() * RobotMap.Metrics.TALON_ENCODER_COUNTS_PER_REV))  * 0.911 - 6.3;
 
     }
 

@@ -122,6 +122,8 @@ public class Robot extends CommandRobotBase {
     @Override
     public void alwaysExecute() {
         SmartDashboard.putNumber("Arm angle", RobotMap.Component.arm.armPivotSubsystem.getCurrentAngleDegrees());
+        SmartDashboard.putNumber("Arm extension", RobotMap.Component.arm.armExtensionSubsystem.getCurrentExtensionLength());
+
         SmartDashboard.putNumber("gyroooo", RobotMap.Component.navx.getAngle());
     }
 
