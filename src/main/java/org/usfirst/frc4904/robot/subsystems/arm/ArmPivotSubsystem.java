@@ -80,31 +80,31 @@ public class ArmPivotSubsystem extends ProfiledPIDSubsystem {
     private ArmMode armMode;
     private double radiansPerSecond;
 
-
-
-
-
-    public final MotorControllerGroup armMotorGroup;
     public final DoubleSupplier extensionDealerMeters;
-    public final WPI_TalonFX encoder;
+    public final WPI_TalonFX left;
+    public final WPI_TalonFX right;
+
 
     private final TelescopingArmPivotFeedForward pivotFeedForward = new TelescopingArmPivotFeedForward(kG_retracted, kG_extended, kS, kV, kA);
 
-    public ArmPivotSubsystem(MotorControllerGroup armMotorGroup, WPI_TalonFX encoder, DoubleSupplier extensionDealerMeters) {
+    public ArmPivotSubsystem(WPI_TalonFX left, WPI_TalonFX right, DoubleSupplier extensionDealerMeters) {
         super(new ProfiledPIDController(kP, kI, kD, 
         new TrapezoidProfile.Constraints(MAX_VELOCITY_PIVOT, MAX_ACCEL_PIVOT)));
-        this.armMotorGroup = armMotorGroup;
-        this.encoder = encoder;
+        this.left = left;
+        this.right = right;
         this.extensionDealerMeters = () -> extensionDealerMeters.getAsDouble();
         armMode = ArmMode.DISABLED;
 
         setGoal(HARD_STOP_ARM_ANGLE);
 
     }
-
+    public double getAverageTicks() {
+        //TODO: check inversion (average ticks might be marginally more accurate)
+        return (left.getSelectedSensorPosition() + right.getSelectedSensorPosition()) / 2;
+    }
     public double getCurrentAngleDegrees() {
         // return slackyEncoder.getRealPosition();
-        return (motorRevsToAngle(encoder.getSelectedSensorPosition() * RobotMap.Metrics.TALON_ENCODER_COUNTS_PER_REV))  * 0.911 - 6.3;
+        return (motorRevsToAngle(getAverageTicks() * RobotMap.Metrics.TALON_ENCODER_COUNTS_PER_REV))  * 0.911 - 6.3;
 
     }
 
@@ -112,7 +112,8 @@ public class ArmPivotSubsystem extends ProfiledPIDSubsystem {
      * Expects sensors to be zeroed at forward hard-stop.
      */
     public void initializeEncoderPositions() {
-        encoder.setSelectedSensorPosition(angleToMotorRevs(HARD_STOP_ARM_ANGLE) * RobotMap.Metrics.TALON_ENCODER_COUNTS_PER_REV);
+        left.setSelectedSensorPosition(angleToMotorRevs(HARD_STOP_ARM_ANGLE) * RobotMap.Metrics.TALON_ENCODER_COUNTS_PER_REV);
+        right.setSelectedSensorPosition(angleToMotorRevs(HARD_STOP_ARM_ANGLE) * RobotMap.Metrics.TALON_ENCODER_COUNTS_PER_REV);
     }
 
     public static double motorRevsToAngle(double revs) {
@@ -138,7 +139,8 @@ public class ArmPivotSubsystem extends ProfiledPIDSubsystem {
       // Calculate the feedforward from the sepoint
       double feedforward = pivotFeedForward.calculate(extensionDealerMeters.getAsDouble()/ArmExtensionSubsystem.MAX_EXTENSION_M, Units.degreesToRadians(getCurrentAngleDegrees()), setpoint.velocity, 0);
       // Add the feedforward to the PID output to get the motor output
-      armMotorGroup.setVoltage(output + feedforward);
+      left.setVoltage(output + feedforward);
+      right.setVoltage(output + feedforward);
     }
 
     @Override
@@ -164,10 +166,12 @@ public class ArmPivotSubsystem extends ProfiledPIDSubsystem {
                 useOutput(m_controller.calculate(getMeasurement()), m_controller.getSetpoint());
                 break;
             case VELOCITY:
-                armMotorGroup.setVoltage(pivotFeedForward.calculate(extensionDealerMeters.getAsDouble()/ArmExtensionSubsystem.MAX_EXTENSION_M, Units.degreesToRadians(getCurrentAngleDegrees()), radiansPerSecond, 0));
+                left.setVoltage(pivotFeedForward.calculate(extensionDealerMeters.getAsDouble()/ArmExtensionSubsystem.MAX_EXTENSION_M, Units.degreesToRadians(getCurrentAngleDegrees()), radiansPerSecond, 0));
+                right.setVoltage(pivotFeedForward.calculate(extensionDealerMeters.getAsDouble()/ArmExtensionSubsystem.MAX_EXTENSION_M, Units.degreesToRadians(getCurrentAngleDegrees()), radiansPerSecond, 0));
                 break;
             case DISABLED:
-                armMotorGroup.stopMotor();
+                left.stopMotor();
+                right.stopMotor();
                 break;
         };
     }

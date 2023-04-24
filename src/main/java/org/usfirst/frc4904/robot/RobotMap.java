@@ -240,7 +240,7 @@ public class RobotMap {
         //     Autonomous.autonEventMap
         // );
 
-        Component.armPivot = new ArmPivotSubsystem(pivotMotors, Component.pivotMotorRight, Component.armExtension::getCurrentExtensionLength);
+        Component.armPivot = new ArmPivotSubsystem(Component.pivotMotorLeft, Component.pivotMotorRight, Component.armExtension::getCurrentExtensionLength);
 
         Component.arm = new ArmSubsystem(Component.armPivot, Component.armExtension);
 
