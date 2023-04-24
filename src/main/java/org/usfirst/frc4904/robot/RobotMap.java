@@ -225,13 +225,11 @@ public class RobotMap {
 
         Component.pivotMotorRight = new WPI_TalonFX(RobotMap.Port.CANMotor.PIVOT_MOTOR_RIGHT);
 
-        MotorControllerGroup pivotMotors = new MotorControllerGroup(Component.pivotMotorLeft, Component.pivotMotorRight);
-
         Component.armExtensionMotor = new WPI_TalonFX(Port.CANMotor.ARM_EXTENSION_MOTOR);
 
         Component.armExtension = new ArmExtensionSubsystem(
             Component.armExtensionMotor,
-            () -> ArmPivotSubsystem.motorRevsToAngle(Component.pivotMotorRight.getSelectedSensorPosition())
+            () -> ArmPivotSubsystem.motorRevsToAngle(Component.pivotMotorRight.getSelectedSensorPosition() * 0.911 - 6.3)
         );
         // Autonomous.autonCommand = Component.chassis.c_buildPathPlannerAuto(
         //     PID.Drive.kS, PID.Drive.kV, PID.Drive.kA,
