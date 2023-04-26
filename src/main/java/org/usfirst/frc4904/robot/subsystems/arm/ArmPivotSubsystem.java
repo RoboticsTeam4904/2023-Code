@@ -3,6 +3,7 @@ package org.usfirst.frc4904.robot.subsystems.arm;
 import java.util.function.DoubleSupplier;
 
 import org.opencv.core.Mat.Tuple2;
+import org.usfirst.frc4904.robot.Robot;
 import org.usfirst.frc4904.robot.RobotMap;
 import org.usfirst.frc4904.standard.custom.motioncontrollers.ezControl;
 import org.usfirst.frc4904.standard.custom.motioncontrollers.ezMotion;
@@ -87,12 +88,12 @@ public class ArmPivotSubsystem extends ProfiledPIDSubsystem {
 
     private final TelescopingArmPivotFeedForward pivotFeedForward = new TelescopingArmPivotFeedForward(kG_retracted, kG_extended, kS, kV, kA);
 
-    public ArmPivotSubsystem(WPI_TalonFX left, WPI_TalonFX right, DoubleSupplier extensionDealerMeters) {
+    public ArmPivotSubsystem(WPI_TalonFX left, WPI_TalonFX right) {
         super(new ProfiledPIDController(kP, kI, kD, 
         new TrapezoidProfile.Constraints(MAX_VELOCITY_PIVOT, MAX_ACCEL_PIVOT)));
         this.left = left;
         this.right = right;
-        this.extensionDealerMeters = () -> extensionDealerMeters.getAsDouble();
+        this.extensionDealerMeters = () -> RobotMap.Component.armExtension.getCurrentExtensionLength();
         armMode = ArmMode.DISABLED;
 
         setGoal(HARD_STOP_ARM_ANGLE);
@@ -100,11 +101,11 @@ public class ArmPivotSubsystem extends ProfiledPIDSubsystem {
     }
     public double getAverageTicks() {
         //TODO: check inversion (average ticks might be marginally more accurate)
-        return (left.getSelectedSensorPosition() + right.getSelectedSensorPosition()) / 2;
+        return (left.getSelectedSensorPosition()/2 + right.getSelectedSensorPosition()/2);
     }
     public double getCurrentAngleDegrees() {
         // return slackyEncoder.getRealPosition();
-        return (motorRevsToAngle(getAverageTicks() * RobotMap.Metrics.TALON_ENCODER_COUNTS_PER_REV))  * 0.911 - 6.3;
+        return (motorRevsToAngle(getAverageTicks()/RobotMap.Metrics.TALON_ENCODER_COUNTS_PER_REV));
 
     }
 
@@ -166,8 +167,8 @@ public class ArmPivotSubsystem extends ProfiledPIDSubsystem {
                 useOutput(m_controller.calculate(getMeasurement()), m_controller.getSetpoint());
                 break;
             case VELOCITY:
-                left.setVoltage(pivotFeedForward.calculate(extensionDealerMeters.getAsDouble()/ArmExtensionSubsystem.MAX_EXTENSION_M, Units.degreesToRadians(getCurrentAngleDegrees()), radiansPerSecond, 0));
-                right.setVoltage(pivotFeedForward.calculate(extensionDealerMeters.getAsDouble()/ArmExtensionSubsystem.MAX_EXTENSION_M, Units.degreesToRadians(getCurrentAngleDegrees()), radiansPerSecond, 0));
+                left.setVoltage(pivotFeedForward.calculate(extensionDealerMeters.getAsDouble()/ArmExtensionSubsystem.MAX_EXTENSION_M, Units.degreesToRadians(getCurrentAngleDegrees()), this.radiansPerSecond, 0));
+                right.setVoltage(pivotFeedForward.calculate(extensionDealerMeters.getAsDouble()/ArmExtensionSubsystem.MAX_EXTENSION_M, Units.degreesToRadians(getCurrentAngleDegrees()), this.radiansPerSecond, 0));
                 break;
             case DISABLED:
                 left.stopMotor();

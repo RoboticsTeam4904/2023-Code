@@ -67,7 +67,7 @@ public class ArmExtensionSubsystem extends ProfiledPIDSubsystem {
      *
      * @param motor the motor controller used to extend the arm
      */
-    public ArmExtensionSubsystem(WPI_TalonFX motor, DoubleSupplier angleDegreesDealer) {
+    public ArmExtensionSubsystem(WPI_TalonFX motor) {
         super(
             new ProfiledPIDController(
                 kP, kI, kD,
@@ -76,7 +76,7 @@ public class ArmExtensionSubsystem extends ProfiledPIDSubsystem {
         );
         this.motor = motor;
         metersPerSecond = 0;
-        this.angleDealer_DEG = angleDegreesDealer;
+        this.angleDealer_DEG = () -> RobotMap.Component.armPivot.getCurrentAngleDegrees();
         extensionMode = ElevatorMode.DISABLED;
 
 
@@ -117,7 +117,7 @@ public class ArmExtensionSubsystem extends ProfiledPIDSubsystem {
                 break;
             case VELOCITY:
                 motor.setVoltage(extensionfeedforward.calculate(Units.degreesToRadians(this.angleDealer_DEG.getAsDouble()),
-                metersPerSecond));
+            this.metersPerSecond));
                 break;
         }
     }

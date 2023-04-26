@@ -26,7 +26,7 @@ public class DefaultOperator extends Operator {
 	@Override
 	public void bindCommands() {
 
-		final DoubleSupplier pivot_getter = () -> RobotMap.HumanInput.Operator.joystick.getAxis(1) * 40;
+		final DoubleSupplier pivot_getter = () -> RobotMap.HumanInput.Operator.joystick.getAxis(1);
 		
 		// might not work
         (new Trigger(() -> pivot_getter.getAsDouble() != 0)).whileTrue( 

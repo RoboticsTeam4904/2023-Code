@@ -100,6 +100,7 @@ public class Robot extends CommandRobotBase {
 
     @Override
     public void testInitialize() {
+        System.out.println("test enabled");
         RobotMap.Component.frontLeftWheelTalon.setNeutralMode(NeutralMode.Coast);
         RobotMap.Component.frontRightWheelTalon.setNeutralMode(NeutralMode.Coast);
         RobotMap.Component.backLeftWheelTalon.setNeutralMode(NeutralMode.Coast);
@@ -107,11 +108,16 @@ public class Robot extends CommandRobotBase {
 
         RobotMap.Component.arm.armPivotSubsystem.initializeEncoderPositions();
 
-        RobotMap.Component.pivotMotorLeft.setNeutralMode(NeutralMode.Brake);
+        RobotMap.Component.pivotMotorLeft.setNeutralMode(NeutralMode.Coast);
         RobotMap.Component.pivotMotorLeft.neutralOutput();
 
-        RobotMap.Component.pivotMotorRight.setNeutralMode(NeutralMode.Brake);
+        RobotMap.Component.pivotMotorRight.setNeutralMode(NeutralMode.Coast);
         RobotMap.Component.pivotMotorRight.neutralOutput();
+
+        RobotMap.Component.armExtensionMotor.setNeutralMode(NeutralMode.Coast);
+        RobotMap.Component.armExtensionMotor.neutralOutput();
+
+
     }
 
     @Override
