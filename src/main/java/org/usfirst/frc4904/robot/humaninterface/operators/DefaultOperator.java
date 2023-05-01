@@ -3,6 +3,7 @@ package org.usfirst.frc4904.robot.humaninterface.operators;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 
+import org.usfirst.frc4904.robot.Robot;
 import org.usfirst.frc4904.robot.RobotMap;
 import org.usfirst.frc4904.robot.humaninterface.drivers.NathanGain;
 import org.usfirst.frc4904.standard.commands.TriggerCommandFactory;
@@ -72,6 +73,15 @@ public class DefaultOperator extends Operator {
 			// stow positions
 			joystick.button11.onTrue(new TriggerCommandFactory(() -> RobotMap.Component.arm.c_posReturnToHomeDown()));
 			joystick.button12.onTrue(new TriggerCommandFactory(() -> RobotMap.Component.arm.c_posReturnToHomeUp()));
+
+			final DoubleSupplier POV_getter = () -> RobotMap.HumanInput.Operator.joystick.getPOV();
+
+			//TODO: Fix
+			// (new Trigger(() -> POV_getter.getAsDouble() == 0)).onTrue(
+			// 	if (RobotMap.Component.armPivot.getLeftMotor().getStatorCurrent() > 15 && RobotMap.Component.armExtension.getCurrentExtensionLength() < .05) {
+            //         RobotMap.Component.armPivot.initializeEncoderPositions();
+            //     }
+			// );
 	}
 	
 }

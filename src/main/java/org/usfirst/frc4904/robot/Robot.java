@@ -117,12 +117,14 @@ public class Robot extends CommandRobotBase {
         RobotMap.Component.armExtensionMotor.setNeutralMode(NeutralMode.Coast);
         RobotMap.Component.armExtensionMotor.neutralOutput();
 
+        RobotMap.Component.arm.armExtensionSubsystem.initializeEncoderPositions(0);
+
+
 
     }
 
     @Override
     public void testExecute() {
-        RobotMap.Component.arm.armExtensionSubsystem.initializeEncoderPositions(0);
     }
 
     @Override
@@ -131,6 +133,10 @@ public class Robot extends CommandRobotBase {
         SmartDashboard.putNumber("Arm extension", RobotMap.Component.arm.armExtensionSubsystem.getCurrentExtensionLength());
 
         SmartDashboard.putNumber("gyroooo", RobotMap.Component.navx.getAngle());
+
+        SmartDashboard.putNumber("supply current", RobotMap.Component.arm.armPivotSubsystem.getLeftMotor().getSupplyCurrent());
+        SmartDashboard.putNumber("stator current", RobotMap.Component.arm.armPivotSubsystem.getLeftMotor().getStatorCurrent());
+
     }
 
 

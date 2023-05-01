@@ -55,8 +55,8 @@ public class ArmPivotSubsystem extends ProfiledPIDSubsystem {
     public static final double kS = 0.10126;
     // public static final double kS_extended = .20586;
 
-    public static final double MAX_VELOCITY_PIVOT = 160;
-    public static final double MAX_ACCEL_PIVOT = 210;
+    public static final double MAX_VELOCITY_PIVOT = 16;
+    public static final double MAX_ACCEL_PIVOT = 10;
 
     
     public static final double kV = 1.8894;
@@ -105,7 +105,7 @@ public class ArmPivotSubsystem extends ProfiledPIDSubsystem {
     }
     public double getCurrentAngleDegrees() {
         // return slackyEncoder.getRealPosition();
-        return (motorRevsToAngle(getAverageTicks()/RobotMap.Metrics.TALON_ENCODER_COUNTS_PER_REV));
+        return (motorRevsToAngle(getAverageTicks()/RobotMap.Metrics.TALON_ENCODER_COUNTS_PER_REV) * .932 - 1.66);
 
     }
 
@@ -149,6 +149,10 @@ public class ArmPivotSubsystem extends ProfiledPIDSubsystem {
         return Units.degreesToRadians(getCurrentAngleDegrees());
     }
 
+    public WPI_TalonFX getLeftMotor() {
+        return this.left;
+    }
+
     public void setVelocity(Double radiansPerSecond) {
         this.armMode = ArmMode.VELOCITY;
         this.radiansPerSecond = radiansPerSecond;
@@ -169,6 +173,8 @@ public class ArmPivotSubsystem extends ProfiledPIDSubsystem {
             case VELOCITY:
                 left.setVoltage(pivotFeedForward.calculate(extensionDealerMeters.getAsDouble()/ArmExtensionSubsystem.MAX_EXTENSION_M, Units.degreesToRadians(getCurrentAngleDegrees()), this.radiansPerSecond, 0));
                 right.setVoltage(pivotFeedForward.calculate(extensionDealerMeters.getAsDouble()/ArmExtensionSubsystem.MAX_EXTENSION_M, Units.degreesToRadians(getCurrentAngleDegrees()), this.radiansPerSecond, 0));
+
+                
                 break;
             case DISABLED:
                 left.stopMotor();
