@@ -36,13 +36,13 @@ public class NathanGain extends Driver {
 
 	@Override
 	public void bindCommands() {
-		RobotMap.HumanInput.Driver.xbox.leftBumper().onTrue(new InstantCommand(
+		RobotMap.HumanInput.Driver.throttleJoystick.button1.onTrue(new InstantCommand(
 			() -> {
 				NathanGain.precisionScaleY = PRECISE_SPEED_SCALE;
 				NathanGain.precisionScaleTurn = PRECISE_TURN_SCALE;
 			}
 		));
-		RobotMap.HumanInput.Driver.xbox.leftBumper().onFalse(new InstantCommand((	
+		RobotMap.HumanInput.Driver.throttleJoystick.button1.onFalse(new InstantCommand((	
 			) -> {
 				NathanGain.precisionScaleY = NORMAL_SPEED_GAIN;
 				NathanGain.precisionScaleTurn = NORMAL_TURN_GAIN;
@@ -51,7 +51,6 @@ public class NathanGain extends Driver {
 		
 		RobotMap.HumanInput.Driver.xbox.y().onTrue(new InstantCommand(() -> NathanGain.precisionScaleY = 1));
 		RobotMap.HumanInput.Driver.xbox.y().onFalse(new InstantCommand(() -> NathanGain.precisionScaleY = NORMAL_SPEED_GAIN));
-		RobotMap.HumanInput.Driver.drivingJoystick.button1.onTrue(new InstantCommand(() -> System.out.println("\n\n\n\n\n\nButton 1 pressed\n\n\n\n\n\n\n")));
 	}
 
 	@Override
@@ -61,7 +60,7 @@ public class NathanGain extends Driver {
 
 	@Override
 	public double getY() {
-		double rawSpeed = RobotMap.HumanInput.Driver.xbox.getRightTriggerAxis() - RobotMap.HumanInput.Driver.xbox.getLeftTriggerAxis();
+		double rawSpeed = RobotMap.HumanInput.Driver.throttleJoystick.getY();
 		double speed;
 		
 		speed = scaleGain(rawSpeed, NathanGain.precisionScaleY, NathanGain.SPEED_EXP) * NathanGain.Y_SPEED_SCALE;
@@ -76,7 +75,7 @@ public class NathanGain extends Driver {
 
 	@Override
 	public double getTurnSpeed() {
-		double rawTurnSpeed = RobotMap.HumanInput.Driver.xbox.getLeftX();
+		double rawTurnSpeed = RobotMap.HumanInput.Driver.turnJoystick.getX();
 		double turnSpeed = scaleGain(rawTurnSpeed, NathanGain.precisionScaleTurn, NathanGain.TURN_EXP) * NathanGain.TURN_SPEED_SCALE;
 		// double precisionTurnSpeed = scaleGain(RobotMap.HumanInput.Driver.xbox.getRightX(), 0.08, 1.2);
 		// double operatorControlTurnSpeed = scaleGain(RobotMap.HumanInput.Operator.joystick.getAxis(0), 0.2, 1.5);

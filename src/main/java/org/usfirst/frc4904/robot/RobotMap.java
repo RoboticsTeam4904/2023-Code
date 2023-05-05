@@ -41,7 +41,8 @@ public class RobotMap {
         public static class HumanInput {
             public static final int joystick = 0;
             public static final int xboxController = 1;
-            public static final int drivingJoystick = 2;
+            public static final int throttleJoystick = 2;
+            public static final int turnJoystick = 3;
         }
 
         // // blinky constants
@@ -151,7 +152,8 @@ public class RobotMap {
     public static class HumanInput {
         public static class Driver {
             public static CustomCommandXbox xbox;
-            public static CustomCommandJoystick drivingJoystick;
+            public static CustomCommandJoystick throttleJoystick;
+            public static CustomCommandJoystick turnJoystick;
         }
 
         public static class Operator {
@@ -164,7 +166,8 @@ public class RobotMap {
 
         HumanInput.Driver.xbox = new CustomCommandXbox(Port.HumanInput.xboxController, 0.1);
 		HumanInput.Operator.joystick = new CustomCommandJoystick(Port.HumanInput.joystick, 0.1);
-        HumanInput.Driver.drivingJoystick = new CustomCommandJoystick(Port.HumanInput.drivingJoystick, 0.1);
+        HumanInput.Driver.throttleJoystick = new CustomCommandJoystick(Port.HumanInput.throttleJoystick, 0.1);
+        HumanInput.Driver.turnJoystick = new CustomCommandJoystick(Port.HumanInput.turnJoystick, 0.1);
         // // UDP things
         // try {
         //     Component.robotUDP = new RobotUDP(Port.Network.LOCAL_SOCKET_ADDRESS, Port.Network.LOCALIZATION_ADDRESS);
