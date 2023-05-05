@@ -49,8 +49,19 @@ public class NathanGain extends Driver {
 			}
 		));
 		
-		RobotMap.HumanInput.Driver.xbox.y().onTrue(new InstantCommand(() -> NathanGain.precisionScaleY = 1));
-		RobotMap.HumanInput.Driver.xbox.y().onFalse(new InstantCommand(() -> NathanGain.precisionScaleY = NORMAL_SPEED_GAIN));
+		RobotMap.HumanInput.Driver.throttleJoystick.button1.onTrue(new InstantCommand(() -> NathanGain.precisionScaleY = 1));
+		RobotMap.HumanInput.Driver.throttleJoystick.button1.onFalse(new InstantCommand(() -> NathanGain.precisionScaleY = NORMAL_SPEED_GAIN));
+
+		RobotMap.HumanInput.Driver.throttleJoystick.button2.onTrue(new InstantCommand(() -> NathanGain.precisionScaleY = 1));
+		RobotMap.HumanInput.Driver.throttleJoystick.button2.onFalse(new InstantCommand(() -> NathanGain.precisionScaleY = NORMAL_SPEED_GAIN));
+
+		RobotMap.HumanInput.Driver.turnJoystick.button1.onTrue(new InstantCommand(() -> NathanGain.precisionScaleY = 1));
+		RobotMap.HumanInput.Driver.turnJoystick.button1.onFalse(new InstantCommand(() -> NathanGain.precisionScaleY = NORMAL_SPEED_GAIN));
+
+		RobotMap.HumanInput.Driver.turnJoystick.button2.onTrue(new InstantCommand(() -> NathanGain.precisionScaleY = 1));
+		RobotMap.HumanInput.Driver.turnJoystick.button1.onFalse(new InstantCommand(() -> NathanGain.precisionScaleY = NORMAL_SPEED_GAIN));
+
+
 	}
 
 	@Override
