@@ -98,14 +98,19 @@ public class RobotMap {
     public static class PID {
         public static class Drive {
             // PID constants
-            public static final double kP = 1.5;
+            // public static final double kP = 1.5;
+            public static final double kP = 3.3016;
             public static final double kI = 0;  // FIXME: tune
             public static final double kD = 0;
             // feedforward constants
-            // these are blinky constants from sysid on new drivetrain wednesday before 
-            public static final double kS = 0.025236; 
-            public static final double kV = 3.0683;
-            public static final double kA = 0.7358;
+            // pre-sfr on-carpet characterization
+            // public static final double kS = 0.025236; 
+            // public static final double kV = 3.0683;
+            // public static final double kA = 0.7358;
+            //post sfr characterization
+            public static final double kS = 0.12507; 
+            public static final double kV = 2.9669;
+            public static final double kA = 0.67699;
 
             public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(Metrics.Chassis.TRACK_WIDTH_METERS);
 
