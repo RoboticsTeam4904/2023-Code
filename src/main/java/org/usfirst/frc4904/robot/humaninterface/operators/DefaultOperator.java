@@ -5,6 +5,8 @@ import org.usfirst.frc4904.robot.humaninterface.drivers.NathanGain;
 import org.usfirst.frc4904.standard.commands.TriggerCommandFactory;
 import org.usfirst.frc4904.standard.humaninput.Operator;
 
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 public class DefaultOperator extends Operator {
@@ -28,8 +30,8 @@ public class DefaultOperator extends Operator {
 
 		// Intake
 		// FIXME: use nameCommand to make it cleaner with expresions (no varibales)
-		var zeroIntake = RobotMap.Component.intake.c_holdVoltage(0);
-		var runOuttake = RobotMap.Component.intake.c_holdVoltage(3);
+		var zeroIntake = RobotMap.Component.intake.c_holdVoltage(9);
+		var runOuttake = RobotMap.Component.intake.c_holdVoltage(joystick.getAxis(3));
 
 		// intake
 		joystick.button2.onTrue(RobotMap.Component.intake.c_startIntake());

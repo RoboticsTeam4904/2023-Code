@@ -63,7 +63,7 @@ public class ArmExtensionSubsystem extends SubsystemBase {
     }
 
     public double getCurrentExtensionLength() {
-        return revsToExtensionLength(motor.getSensorPositionRotations()) * 0.968 - 0.0853;
+        return revsToExtensionLength(motor.getSensorPositionRotations());
     }
 
     public void setVoltageSafely(double voltage) {

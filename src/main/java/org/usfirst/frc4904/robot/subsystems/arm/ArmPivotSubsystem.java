@@ -83,7 +83,7 @@ public class ArmPivotSubsystem extends SubsystemBase {
 
     public double getCurrentAngleDegrees() {
         // return slackyEncoder.getRealPosition();
-        return motorRevsToAngle(armMotorGroup.getSensorPositionRotations()) * 0.911 - 6.3;
+        return motorRevsToAngle(armMotorGroup.getSensorPositionRotations())*0.985 - 5.18; // * 0.911 - 6.3
 
     }
 
