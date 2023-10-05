@@ -435,9 +435,10 @@ public class RobotContainer2 {
             ));
         return cmd;
     }
-    public Command twoPieceBalanceAuton() { // shoot cone, grab cube, shoot cube, doesn't balance
-        var cmd = RobotMap.Component.arm.c_shootCones(4, // shoot cone
+    public Command simpleAuton() { // this is JUST placing a cube and exiting the zone, no complicated stuff we cant do
+        var cmd = RobotMap.Component.arm.c_holdRotation(135,
             () -> new SequentialCommandGroup(
+            RobotMap.Component.intake.c_holdVoltage(9).withTimeout(0.5),
                     // new ParallelCommandGroup( // then, in parallel
                     //     getAutonomousCommand(getTrajectory("go_to_pickup_next")), // go to pickup location
                     //     (new WaitCommand(2.5)).andThen(RobotMap.Component.intake.c_holdVoltage(-8)) // start intaking when we get close TODO: tune 2.5 sec wait (should be ~.5sec less than time to run spline above, but aim low to be safe)
@@ -447,10 +448,9 @@ public class RobotContainer2 {
                     //         () -> getAutonomousCommand(getTrajectory("from_pickup_to_place")) // return to the next placement location
                     // ),
                     // RobotMap.Component.arm.c_shootCubes(4), // finally, shoot the cube we just picked up and stow
-                    getAutonomousCommand(getTrajectory("from_cube_place_to_ramp_edge")),
-                    new WaitCommand(1.5), //wait for ramp to lower,  TODO: needs tuning -- lower it as much as you can
-                    getAutonomousCommand(getTrajectory("onto_ramp"))
-            ));
+            getAutonomousCommand(getTrajectory("past_ramp"))
+                    
+        ));
         return cmd;
     }
 

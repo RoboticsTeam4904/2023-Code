@@ -91,7 +91,7 @@ public class NathanGain extends Driver {
 		// double precisionTurnSpeed = scaleGain(RobotMap.HumanInput.Driver.xbox.getRightX(), 0.08, 1.2);
 		// double operatorControlTurnSpeed = scaleGain(RobotMap.HumanInput.Operator.joystick.getAxis(0), 0.2, 1.5);
 		
-		if (NathanGain.isFlippy) return (turnSpeed) * -1;
-		return turnSpeed;// + precisionTurnSpeed;
+		if (NathanGain.isFlippy) return (turnSpeed);
+		return turnSpeed*-1;// + precisionTurnSpeed; //is mounted inverted so we need to revert by default
 	}
 }

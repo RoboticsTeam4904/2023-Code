@@ -150,6 +150,11 @@ public class ArmSubsystem extends SubsystemBase {
         );
     }
 
+    public Command c_holdRotation(double degreesFromHorizontal, Supplier<Command> onArrivalCommandDealer) {
+        return armPivotSubsystem.c_holdRotation(degreesFromHorizontal, MAX_VELOCITY_PIVOT, MAX_ACCEL_PIVOT, onArrivalCommandDealer);
+    }
+
+
     public Command c_holdArmPose(Pair<Double, Double> emacs) {
         return c_holdArmPose(emacs.getFirst(), emacs.getSecond());
     }
