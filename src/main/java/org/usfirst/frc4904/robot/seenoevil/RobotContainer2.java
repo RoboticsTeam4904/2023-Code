@@ -437,7 +437,8 @@ public class RobotContainer2 {
     }
     public Command simpleAuton() { // this is JUST placing a cube and exiting the zone, no complicated stuff we cant do
         var cmd = RobotMap.Component.arm.c_holdRotation(135,
-            () -> new SequentialCommandGroup(
+            () -> new ParallelCommandGroup(
+                new SequentialCommandGroup(
             RobotMap.Component.intake.c_holdVoltage(9).withTimeout(0.5),
                     // new ParallelCommandGroup( // then, in parallel
                     //     getAutonomousCommand(getTrajectory("go_to_pickup_next")), // go to pickup location
@@ -448,9 +449,12 @@ public class RobotContainer2 {
                     //         () -> getAutonomousCommand(getTrajectory("from_pickup_to_place")) // return to the next placement location
                     // ),
                     // RobotMap.Component.arm.c_shootCubes(4), // finally, shoot the cube we just picked up and stow
-            getAutonomousCommand(getTrajectory("past_ramp"))
-                    
-        ));
+            getAutonomousCommand(getTrajectory("past_ramp")),
+            RobotMap.Component.intake.c_holdVoltage(0)
+        )       
+        )
+        
+        );
         return cmd;
     }
 

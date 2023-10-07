@@ -223,6 +223,8 @@ public class Robot extends CommandRobotBase {
     @Override
     public void testExecute() {
         RobotMap.Component.arm.armExtensionSubsystem.initializeEncoderPositions(0);
+        RobotMap.Component.intake.c_holdVoltage(0);
+
        
     }
 

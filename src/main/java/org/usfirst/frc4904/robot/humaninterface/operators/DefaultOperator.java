@@ -30,8 +30,8 @@ public class DefaultOperator extends Operator {
 
 		// Intake
 		// FIXME: use nameCommand to make it cleaner with expresions (no varibales)
-		var zeroIntake = RobotMap.Component.intake.c_holdVoltage(9);
-		var runOuttake = RobotMap.Component.intake.c_holdVoltage(joystick.getAxis(3));
+		var zeroIntake = RobotMap.Component.intake.c_holdVoltage(0);
+		var runOuttake = RobotMap.Component.intake.c_holdVoltage(9);
 
 		// intake
 		joystick.button2.onTrue(RobotMap.Component.intake.c_startIntake());
